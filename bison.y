@@ -58,13 +58,22 @@ N_START	: {
 
 N_EXPR : N_CONST {
   printRule("EXPR", "CONST");
+  $$.type = $1.type;
+  $$.numParams = $1.numParams;
+  $$.returnType = $1.returnType;
 }
 | T_IDENT {
   printRule("EXPR", "IDENT");
   checkForDefinition($1);
+  $$.type = $1.type;
+  $$.numParams = $1.numParams;
+  $$.returnType = $1.returnType;
 }
 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN {
   printRule("EXPR", "( PARENTHESIZED_EXPR )");
+  $$.type = $2.type;
+  $$.numParams = $2.numParams;
+  $$.returnType = $2.returnType;
 };
 
 N_CONST : T_INTCONST {
