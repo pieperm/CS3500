@@ -1,2 +1,6 @@
 CMakeLists.txt
 cmake-build-debug
+bison.tab.c
+lex.yy.c
+mfpl_parser.exe
+main.cpp
