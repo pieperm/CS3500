@@ -34,6 +34,7 @@ extern "C"
 %union
 {
   char* text;
+  TYPE_INFO typeInfo;
 }
 
 %token T_LETSTAR T_LAMBDA T_INPUT T_PRINT T_IF T_EXIT T_PROGN T_LPAREN T_RPAREN
@@ -42,6 +43,7 @@ extern "C"
 %token T_T T_NIL T_IDENT T_INTCONST T_STRCONST T_UNKNOWN
 
 %type <text> T_IDENT
+%type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR
 
 %start N_START
 
@@ -67,15 +69,27 @@ N_EXPR : N_CONST {
 
 N_CONST : T_INTCONST {
   printRule("CONST", "INTCONST");
+  $$.type = INT;
+  $$.numParams = NOT_APPLICABLE;
+  $$.returnType = NOT_APPLICABLE;
 }
 | T_STRCONST {
   printRule("CONST", "STRCONST");
+  $$.type = STR;
+  $$.numParams = NOT_APPLICABLE;
+  $$.returnType = NOT_APPLICABLE;
 }
 | T_T {
   printRule("CONST", "t");
+  $$.type = BOOL;
+  $$.numParams = NOT_APPLICABLE;
+  $$.returnType = NOT_APPLICABLE;
 }
 | T_NIL {
   printRule("CONST", "nil");
+  $$.type = BOOL;
+  $$.numParams = NOT_APPLICABLE;
+  $$.returnType = NOT_APPLICABLE;
 };
 
 N_PARENTHESIZED_EXPR : N_ARITHLOGIC_EXPR {
