@@ -1,0 +1,10 @@
+(progn ; all valid not's
+(not "bad")
+(not -20)
+(not t)
+(not nil)
+(not (> 5 6))
+(not (progn ))
+)
+
+

@@ -1,0 +1,7 @@
+(let* ( (f (lambda (x) (+ 1 x)))
+      )
+ (progn
+  (f "foo")
+  (f 100)
+ )
+)

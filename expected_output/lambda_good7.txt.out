@@ -1,0 +1,19 @@
+
+___Entering new scope...
+
+
+___Entering new scope...
+
+___Adding x to symbol table
+
+___Exiting scope...
+
+___Adding f to symbol table
+
+___Exiting scope...
+
+EXPR type is: INT_OR_STR_OR_BOOL
+---- Completed parsing ----
+
+
+Bye!
