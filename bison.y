@@ -10,6 +10,8 @@ Bison specification for MFPL language
 
 int lineNumber = 1;
 stack<SYMBOL_TABLE> scopeStack;
+bool printLexemes = true;
+bool printProductions = true;
 
 void printRule(const char*, const char*);
 int yyerror(const char *s);
@@ -227,7 +229,9 @@ extern FILE *yyin;
 
 void printRule(const char *lhs, const char *rhs)
 {
-  printf("%s -> %s\n", lhs, rhs);
+  if(printProductions) {
+    printf("%s -> %s\n", lhs, rhs);
+  }
   return;
 }
 
@@ -238,7 +242,9 @@ int yyerror(const char *s) {
 }
 
 void printTokenInfo(const char* tokenType, const char* lexeme) {
-  printf("TOKEN: %s  LEXEME: %s\n", tokenType, lexeme);
+  if(printLexemes) {
+    printf("TOKEN: %s  LEXEME: %s\n", tokenType, lexeme);
+  }
 }
 
 void beginScope() {
