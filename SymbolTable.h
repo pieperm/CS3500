@@ -1,10 +1,27 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
+#define UNDEFINED -1
+#define FUNCTION 0
+#define INT 1
+#define STR 2
+#define INT_OR_STR 3
+#define BOOL 4
+#define INT_OR_BOOL 5
+#define STR_OR_BOOL 6
+#define INT_OR_STR_OR_BOOL 7
+#define NOT_APPLICABLE -1
+
 #include <map>
 #include <string>
 #include "SymbolTableEntry.h"
 using namespace std;
+
+typedef struct {
+    int type;
+    int numParams;
+    int returnType;
+} TYPE_INFO;
 
 class SYMBOL_TABLE 
 {
