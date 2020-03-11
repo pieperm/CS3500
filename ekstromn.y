@@ -155,12 +155,20 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				bail();
 				}
 				;
-N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_EXPR_LIST
+N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				{
 				printRule("PROGN_OR_USERFUNCTCALL",
 				          "FUNCT_NAME EXPR_LIST");
 				}
+				| T_LPAREN N_LAMBDA_EXPR T_RPAREN N_ACTUAL_PARAMS
+				{
+				}
 				;
+N_ACTUAL_PARAMS : N_EXPR_LIST{
+				}
+				| // epsilon
+				{
+				}
 N_FUNCT_NAME		: T_PROGN
 				{
 				printRule("FUNCT_NAME", 
