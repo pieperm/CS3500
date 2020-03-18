@@ -88,6 +88,8 @@ N_START		: // epsilon
 N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 			{
 			$$.type = $1.type;
+			$$.numParams = $1.numParams;
+			$$.returnType = $1.returnType;
 			}
 								| T_IDENT
       {
