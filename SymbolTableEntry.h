@@ -12,20 +12,27 @@ private:
   // Member variables
   string name;
   int typeCode;  
+	TYPE_INFO typeInfo;
 
 public:
   // Constructors
-  SYMBOL_TABLE_ENTRY( ) { name = ""; typeCode = UNDEFINED; }
+  SYMBOL_TABLE_ENTRY( ) 
+	{
+		name = ""; 
+		typeInfo.type = UNDEFINED; 
+		//all 3
+	}
 
-  SYMBOL_TABLE_ENTRY(const string theName, const int theType) 
+  SYMBOL_TABLE_ENTRY(const string theName, const TYPE_INFO theType) 
   {
     name = theName;
-    typeCode = theType;
+    typeInfo.type = theType.type;
+		//all 3
   }
 
   // Accessors
   string getName() const { return name; }
-  int getTypeCode() const { return typeCode; }
+  TYPE_INFO getTypeInfo() const { return TYPE_INFO; }
 };
 
 #endif  // SYMBOL_TABLE_ENTRY_H

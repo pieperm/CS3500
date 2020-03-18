@@ -2,14 +2,14 @@
 #define SYMBOL_TABLE_H
 
 #define UNDEFINED -1
-#define FUNCTION 0
-#define INT 1
-#define STR 2
-#define INT_OR_STR 3
-#define BOOL 4
-#define INT_OR_BOOL 5
-#define STR_OR_BOOL 6
-#define INT_OR_STR_OR_BOOL 7
+#define FUNCTION 0							//0000
+#define INT 1										//0001
+#define STR 2										//0010
+#define INT_OR_STR 3						//0011
+#define BOOL 4									//0100
+#define INT_OR_BOOL 5						//0101
+#define STR_OR_BOOL 6						//0110
+#define INT_OR_STR_OR_BOOL 7		//0111
 #define NOT_APPLICABLE -1
 
 #include <map>
@@ -27,6 +27,7 @@ class SYMBOL_TABLE
 {
 private:
   std::map<string, SYMBOL_TABLE_ENTRY> hashTable;
+	TYPE_INFO typeInfo;
 
 public:
   //Constructor
@@ -49,12 +50,12 @@ public:
   // If a SYMBOL_TABLE_ENTRY with name theName is
   // found in this symbol table, then return true;
   // otherwise, return false.
-  bool findEntry(string theName) 
+  TYPE_INFO findEntry(string theName) 
   {
     map<string, SYMBOL_TABLE_ENTRY>::iterator itr;
     if ((itr = hashTable.find(theName)) == hashTable.end())
-      return(false);
-    else return(true);
+      return(UNDEFINED);
+    else return(typeInfo);
   }
 
 };

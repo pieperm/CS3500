@@ -85,16 +85,18 @@ N_START		: // epsilon
 			printf("\n---- Completed parsing ----\n\n");
 			}
 			;
-N_EXPR		: N_CONST
+N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 			{
-			
+			$$.type = $1.type;
 			}
-                | T_IDENT
-                {
+								| T_IDENT
+      {
 			
 			bool found = findEntryInAnyScope(string($1));
 			if(!found)
 				yyerror("undefined identifier");
+			
+			$$.type = scopeStack.top().findEntryType(string($1));
 			}
                 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
       {
@@ -177,7 +179,7 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				;
 N_ACTUAL_PARAMS : N_EXPR_LIST{
 				}
-				| // epsilon
+				| //epsilon
 				{
 				}
 N_FUNCT_NAME		: T_PROGN
