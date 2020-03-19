@@ -10,7 +10,7 @@ Bison specification for MFPL language
 
 int lineNumber = 1;
 stack<SYMBOL_TABLE> scopeStack;
-bool printLexemes = true;
+bool printLexemes = false;
 bool printProductions = true;
 
 void printRule(const char*, const char*);
@@ -18,9 +18,10 @@ int yyerror(const char *s);
 void printTokenInfo(const char* tokenType, const char* lexeme);
 void beginScope();
 void endScope();
-void addToSymbolTable(const char* name);
+void addToSymbolTable(const char* name, const TYPE_INFO typeInfo);
 void checkForDefinition(const char* name);
 bool findEntryInAnyScope(const string theName);
+void printExpressionType(const int type);
 
 extern "C"
 {
@@ -43,7 +44,7 @@ extern "C"
 %token T_T T_NIL T_IDENT T_INTCONST T_STRCONST T_UNKNOWN
 
 %type <text> T_IDENT
-%type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR
+%type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
 
 %start N_START
 
@@ -58,16 +59,20 @@ N_START	: {
 
 N_EXPR : N_CONST {
   printRule("EXPR", "CONST");
+  printExpressionType($1.type);
 }
 | T_IDENT {
   printRule("EXPR", "IDENT");
   checkForDefinition($1);
+  TYPE_INFO info = scopeStack.top().getEntry(string($1)).getTypeInfo();
+  printExpressionType(info.type);
 }
 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN {
   printRule("EXPR", "( PARENTHESIZED_EXPR )");
   $$.type = $2.type;
   $$.numParams = $2.numParams;
   $$.returnType = $2.returnType;
+  printExpressionType($2.type);
 };
 
 N_CONST : T_INTCONST {
@@ -317,6 +322,37 @@ bool findEntryInAnyScope(const string theName) {
     scopeStack.push(symbolTable);
     return(found);
   }
+}
+
+void printExpressionType(const int type) {
+  char const * typeStr;
+  switch(type) {
+    case 0:
+      typeStr = "FUNCTION";
+      break;
+    case 1:
+      typeStr = "INT";
+      break;
+    case 2:
+      typeStr = "STR";
+      break;
+    case 3:
+      typeStr = "INT_OR_STR";
+      break;
+    case 4:
+      typeStr = "BOOL";
+      break;
+    case 5:
+      typeStr = "INT_OR_BOOL";
+      break;
+    case 6:
+      typeStr = "STR_OR_BOOL";
+      break;
+    case 7:
+      typeStr = "INT_OR_STR_OR_BOOL";
+      break;
+  }
+  printf("EXPR type is: %s\n", typeStr);
 }
 
 int main() {
