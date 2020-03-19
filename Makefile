@@ -1,7 +1,7 @@
 default:
-	flex flex.l
-	bison bison.y
-	g++ bison.tab.c -o mfpl_parser
+	flex mfpl.l
+	bison mfpl.y
+	g++ mfpl.tab.c -o mfpl_parser
 	mfpl_parser < $(input) > myOutput.out
 
 .PHONY: clean
