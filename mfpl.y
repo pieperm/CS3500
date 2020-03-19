@@ -58,16 +58,10 @@ N_START	: {
 
 N_EXPR : N_CONST {
   printRule("EXPR", "CONST");
-  $$.type = $1.type;
-  $$.numParams = $1.numParams;
-  $$.returnType = $1.returnType;
 }
 | T_IDENT {
   printRule("EXPR", "IDENT");
   checkForDefinition($1);
-  $$.type = $1.type;
-  $$.numParams = $1.numParams;
-  $$.returnType = $1.returnType;
 }
 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN {
   printRule("EXPR", "( PARENTHESIZED_EXPR )");
@@ -171,7 +165,7 @@ N_ID_EXPR_LIST : {
 }
 | N_ID_EXPR_LIST T_LPAREN T_IDENT N_EXPR T_RPAREN {
   printRule("ID_EXPR_LIST", "ID_EXPR_LIST ( IDENT EXPR )");
-  addToSymbolTable($3);
+//  addToSymbolTable($3, $$);
 };
 
 N_LAMBDA_EXPR : T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR {
@@ -184,7 +178,7 @@ N_ID_LIST : {
 }
 | N_ID_LIST T_IDENT {
   printRule("ID_LIST", "ID_LIST IDENT");
-  addToSymbolTable($2);
+//  addToSymbolTable($2, $$);
 };
 
 N_PRINT_EXPR : T_PRINT N_EXPR {
@@ -290,14 +284,14 @@ void endScope() {
   printf("\n___Exiting scope...\n\n");
 }
 
-void addToSymbolTable(const char* name) {
+void addToSymbolTable(const char* name, const TYPE_INFO typeInfo) {
   string nameStr = string(name);
   bool multiplyDefined = scopeStack.top().findEntry(nameStr);
   printf("___Adding %s to symbol table\n", name);
   if(multiplyDefined) {
     yyerror("Multiply defined identifier");
   } else {
-    scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY(nameStr, UNDEFINED));
+    scopeStack.top().addEntry(SYMBOL_TABLE_ENTRY(nameStr, typeInfo));
   }
 }
 
