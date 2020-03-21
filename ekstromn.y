@@ -95,11 +95,14 @@ N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 								| T_IDENT
       {
 			
-			TYPE_INFO found = findEntryInAnyScope(string($1));
+			bool found = findEntryInAnyScope(string($1));
 			if(!found)
 				yyerror("undefined identifier");
 			
-			$$.type = scopeStack.top().findEntry(string($1));
+			TYPE_INFO info = scopeStack.top().findEntry(string($1));
+			$$.type = info.type;
+			$$.numParams = info.numParams;
+			$$.returnType = info.returnType;
 			}
                 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
       {
@@ -227,11 +230,12 @@ N_ID_EXPR_LIST  : /* epsilon */
       | N_ID_EXPR_LIST T_LPAREN T_IDENT N_EXPR T_RPAREN 
 			{
 			
-			if (scopeStack.top( ).findEntry(string($3)))
+			TYPE_INFO info = scopeStack.top( ).findEntry(string($3));
+			if (info.type == -1)
 				yyerror("multiply defined identifier");
 			else
 			{
-				SYMBOL_TABLE_ENTRY x(string($3), $3.typeInfo);
+				SYMBOL_TABLE_ENTRY x(string($3), $4);
 				scopeStack.top().addEntry(x);
 				printf("___Adding %s to symbol table\n", $3);
 			}
@@ -255,7 +259,9 @@ N_ID_LIST       : /* epsilon */
 				yyerror("multiply defined identifier");
 			else
 			{
-				SYMBOL_TABLE_ENTRY x(string($2), UNDEFINED);
+				TYPE_INFO temp;
+				temp.type = INT_OR_STR_OR_BOOL;
+				SYMBOL_TABLE_ENTRY x(string($2), temp);
 				scopeStack.top().addEntry(x);
 				printf("___Adding %s to symbol table\n", $2);
 			}
