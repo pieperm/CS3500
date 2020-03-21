@@ -16,9 +16,9 @@
 # to the correct format specified in Canvas.
 # Otherwise, make sure your executable is named `a.out`
 # or update the first line in the for loop.
-flex mfpl.l
-bison mfpl.y
-g++ mfpl.tab.c
+flex ekstromn.l
+bison ekstromn.y
+g++ ekstromn.tab.c
 
 test_files=`ls ./sample_input`
 diff_files=0

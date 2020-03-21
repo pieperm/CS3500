@@ -29,6 +29,7 @@ void bail();
 void beginScope();
 void endScope();
 bool findEntryInAnyScope(const string theName);
+void printExpressionType(const int type);
 
 stack<SYMBOL_TABLE> scopeStack;
 
@@ -66,7 +67,8 @@ extern "C"
 
 %type <text> T_IDENT
 %type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
-%type <typeInfo> N_ARITHLOGIC_EXPR
+%type <typeInfo> N_ARITHLOGIC_EXPR N_LET_EXPR N_LAMBDA_EXPR N_PRINT_EXPR
+%type <typeInfo> N_INPUT_EXPR N_EXPR_LIST
 /*
  *	Starting point.
  */
@@ -82,7 +84,7 @@ N_START		: // epsilon
 			}
 			| N_START N_EXPR
 			{
-			
+			printExpressionType($2.type);
 			printf("\n---- Completed parsing ----\n\n");
 			}
 			;
@@ -215,11 +217,30 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
                      	;
 N_IF_EXPR    	: T_IF N_EXPR N_EXPR N_EXPR
 			{
+			if($2.type == FUNCTION)
+				yyerror("Arg 1 cannot be function");
+			else if($3.type == FUNCTION)
+				yyerror("Arg 2 cannot be function");
+			else if($4.type == FUNCTION)
+				yyerror("Arg 3 cannot be function");
+			else
+			{
+			$$.type = $3.type | $4.type;
+			$$.numParams = UNDEFINED;
+			$$.returnType = UNDEFINED;
+			}
 			}
 			;
 N_LET_EXPR      : T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
 			{
-			
+			if($5.type == FUNCTION)
+				yyerror("Arg 2 cannot be a function");
+			else
+			{
+			$$.type = $5.type;
+			$$.numParams = $5.numParams;
+			$$.returnType = $5.returnType;
+			}
 			endScope();
 			}
 			;
@@ -243,7 +264,14 @@ N_ID_EXPR_LIST  : /* epsilon */
 			;
 N_LAMBDA_EXPR   : T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
 			{
-			
+			if($5.type == FUNCTION)
+				yyerror("Arg 2 cannot be a function");
+			else
+			{
+			$$.type = FUNCTION;
+			$$.numParams = $5.numParams; //supposed to be length of N_ID_LIST
+			$$.returnType = $5.type;
+			}
 			endScope();
 			}
 			;
@@ -269,21 +297,34 @@ N_ID_LIST       : /* epsilon */
 			;
 N_PRINT_EXPR    : T_PRINT N_EXPR
 			{
-			
+			if($2.type == FUNCTION)
+				yyerror("Arg 1 cannot be function");
+			else
+				{
+				$$.type = $2.type;
+				$$.numParams = UNDEFINED;
+				$$.returnType = UNDEFINED;
+				}
 			}
 			;
 N_INPUT_EXPR    : T_INPUT
 			{
-			
+			$$.type = INT_OR_STR;
+			$$.numParams = UNDEFINED;
+			$$.returnType = UNDEFINED;
 			}
 			;
 N_EXPR_LIST     : N_EXPR N_EXPR_LIST  
 			{
-			
+			$$.type = $2.type;
+			$$.numParams = $2.numParams;
+			$$.returnType = $2.returnType;
 			}
-      | /* epsilon */
+      | N_EXPR
 			{
-			
+			$$.type = $1.type;
+			$$.numParams = $1.numParams;
+			$$.returnType = $1.returnType;
 			}
 			;
 N_BIN_OP	     : N_ARITH_OP
@@ -406,6 +447,37 @@ bool findEntryInAnyScope(const string theName)
 		scopeStack.push(symbolTable); 			// restore the stack
 		return(found);
 	}
+}
+
+void printExpressionType(const int type) {
+  char const * typeStr;
+  switch(type) {
+    case 0:
+      typeStr = "FUNCTION";
+      break;
+    case 1:
+      typeStr = "INT";
+      break;
+    case 2:
+      typeStr = "STR";
+      break;
+    case 3:
+      typeStr = "INT_OR_STR";
+      break;
+    case 4:
+      typeStr = "BOOL";
+      break;
+    case 5:
+      typeStr = "INT_OR_BOOL";
+      break;
+    case 6:
+      typeStr = "STR_OR_BOOL";
+      break;
+    case 7:
+      typeStr = "INT_OR_STR_OR_BOOL";
+      break;
+  }
+  printf("EXPR type is: %s\n", typeStr);
 }
 
 int main() 

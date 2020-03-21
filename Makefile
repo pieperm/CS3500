@@ -1,7 +1,7 @@
 default:
-	flex mfpl.l
-	bison mfpl.y
-	g++ mfpl.tab.c -o mfpl_parser
+	flex ekstromn.l
+	bison ekstromn.y
+	g++ ekstromn.tab.c -o mfpl_parser
 	mfpl_parser < $(input) > myOutput.out
 
 .PHONY: clean
