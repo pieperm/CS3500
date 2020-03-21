@@ -32,13 +32,13 @@ for file in $test_files; do
 					
 	if [ $diff_lines == 0 ]
 	then
-		echo $file matches.
+		echo $file matches. >> comparision.txt
 	else
 		diff_files=$((diff_files+1))
-		echo $file does not match. There are $diff_lines differences.
+		echo $file does not match. There are $diff_lines differences. >> comparision.txt
 	fi
 done
 
-echo
-echo "Number of different input files: $diff_files"
-echo
+echo >> comparision.txt
+echo "Number of different input files: $diff_files" >> comparision.txt
+echo >> comparision.txt
