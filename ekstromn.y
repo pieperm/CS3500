@@ -65,7 +65,8 @@ extern "C"
 %token  T_INTCONST T_STRCONST T_T T_NIL T_IDENT T_UNKNOWN
 
 %type <text> T_IDENT
-%type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR
+%type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
+%type <typeInfo> N_ARITHLOGIC_EXPR
 /*
  *	Starting point.
  */
@@ -94,18 +95,18 @@ N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 								| T_IDENT
       {
 			
-			bool found = findEntryInAnyScope(string($1));
+			TYPE_INFO found = findEntryInAnyScope(string($1));
 			if(!found)
 				yyerror("undefined identifier");
 			
-			$$.type = scopeStack.top().findEntryType(string($1));
+			$$.type = scopeStack.top().findEntry(string($1));
 			}
                 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
       {
 			
 			$$.type = $2.type;
 			$$.numParams = $2.numParams;
-			$$returnType = $2.returnType;
+			$$.returnType = $2.returnType;
 			}
 			;
 N_CONST		: T_INTCONST
@@ -230,7 +231,7 @@ N_ID_EXPR_LIST  : /* epsilon */
 				yyerror("multiply defined identifier");
 			else
 			{
-				SYMBOL_TABLE_ENTRY x(string($3), UNDEFINED);
+				SYMBOL_TABLE_ENTRY x(string($3), $3.typeInfo);
 				scopeStack.top().addEntry(x);
 				printf("___Adding %s to symbol table\n", $3);
 			}
@@ -249,7 +250,8 @@ N_ID_LIST       : /* epsilon */
       | N_ID_LIST T_IDENT 
 			{
 			
-			if (scopeStack.top( ).findEntry(string($2)))
+			TYPE_INFO finder = scopeStack.top( ).findEntry(string($2));
+			if (finder.type == -1)
 				yyerror("multiply defined identifier");
 			else
 			{
@@ -386,8 +388,9 @@ void endScope()
 bool findEntryInAnyScope(const string theName)
 {
 	if (scopeStack.empty( )) return(false);
-	bool found = scopeStack.top( ).findEntry(theName);
-	if (found)
+	TYPE_INFO finder = scopeStack.top( ).findEntry(theName);
+	int found = finder.type;
+	if (found != -1)
 		return(true);
 	else 
 	{ // check in "next higher" scope
