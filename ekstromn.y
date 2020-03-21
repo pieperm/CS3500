@@ -39,6 +39,7 @@ int yyerror(const char *s)
 {
   printf("Line %d: %s\n", lineNum, s);
   bail();
+  return 0;
 }
 
 extern "C" 
@@ -53,7 +54,8 @@ extern "C"
 %union
 {
 	char* text;
-	TYPE_INFO typeInfo; 
+	TYPE_INFO typeInfo;
+	int binOpType;
 }
 
 /*
@@ -67,7 +69,8 @@ extern "C"
 
 %type <text> T_IDENT
 %type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
-%type <typeInfo> N_ARITHLOGIC_EXPR
+%type <typeInfo> N_ARITHLOGIC_EXPR N_INPUT_EXPR
+%type <binOpType> N_BIN_OP
 /*
  *	Starting point.
  */
@@ -84,7 +87,7 @@ N_START		: // epsilon
 			| N_START N_EXPR
 			{
 			printExpressionType($2.type);
-			printf("\n---- Completed parsing ----\n\n");
+			printf("---- Completed parsing ----\n\n");
 			}
 			;
 N_EXPR		: N_CONST				//gotta cast type from further step from previous step
@@ -144,7 +147,9 @@ N_CONST		: T_INTCONST
 			;
 N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR 
 				{
-				
+				$$.type = $1.type;
+				$$.numParams = NOT_APPLICABLE;
+				$$.returnType = NOT_APPLICABLE;
 				}
                       | N_IF_EXPR 
 				{
@@ -211,7 +216,31 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				}
 				| N_BIN_OP N_EXPR N_EXPR
 				{
-				
+				if($1 == 1) {  // arithmetic operator
+				    if($2.type != INT) {
+				        yyerror("Arg 1 must be integer");
+				    } else if($3.type != INT) {
+				        yyerror("Arg 2 must be integer");
+				    } else {
+				        $$.type = INT;
+				    }
+				} else if($1 == 2) {  // logical operator
+				    if($2.type == FUNCTION) {
+				        yyerror("Arg 1 cannot be a function");
+				    } else if($3.type == FUNCTION) {
+				        yyerror("Arg 2 cannot be a function");
+				    } else {
+				        $$.type = BOOL;
+				    }
+				} else if($1 == 3) {  // relational operator
+                    if($2.type != INT && $2.type != STR) {
+                        yyerror("Arg 1 must be integer or string");
+                    } else if($3.type != INT && $3.type != STR) {
+                        yyerror("Arg 2 must be integer or string");
+                    } else {
+                        $$.type = BOOL;
+                    }
+				}
 				}
                      	;
 N_IF_EXPR    	: T_IF N_EXPR N_EXPR N_EXPR
@@ -275,7 +304,7 @@ N_PRINT_EXPR    : T_PRINT N_EXPR
 			;
 N_INPUT_EXPR    : T_INPUT
 			{
-			
+			$$.type = INT_OR_STR_OR_BOOL;
 			}
 			;
 N_EXPR_LIST     : N_EXPR N_EXPR_LIST  
@@ -289,22 +318,21 @@ N_EXPR_LIST     : N_EXPR N_EXPR_LIST
 			;
 N_BIN_OP	     : N_ARITH_OP
 			{
-			
+			$$ = 1;
 			}
 			|
 			N_LOG_OP
 			{
-			
+			$$ = 2;
 			}
 			|
 			N_REL_OP
 			{
-			
+			$$ = 3;
 			}
 			;
 N_ARITH_OP	     : T_ADD
 			{
-			
 			}
       | T_SUB
 			{

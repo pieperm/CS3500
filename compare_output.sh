@@ -16,15 +16,15 @@
 # to the correct format specified in Canvas.
 # Otherwise, make sure your executable is named `a.out`
 # or update the first line in the for loop.
-flex mfpl.l
-bison mfpl.y
-g++ mfpl.tab.c
+flex ekstromn.l
+bison ekstromn.y
+g++ ekstromn.tab.c -o mfpl_parser
 
 test_files=`ls ./sample_input`
 diff_files=0
 
 for file in $test_files; do
-	a.out < ./sample_input/$file > ./my_output/$file.out
+	./mfpl_parser.exe < ./sample_input/$file > ./my_output/$file.out
 	
     diff_lines=`diff ./my_output/$file.out \
 					./expected_output/$file.out \
