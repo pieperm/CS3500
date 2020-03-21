@@ -17,10 +17,17 @@
 #include "SymbolTableEntry.h"
 using namespace std;
 
+typedef struct {
+    int type;
+    int numParams;
+    int returnType;
+} TYPE_INFO;
+
 class SYMBOL_TABLE 
 {
 private:
   std::map<string, SYMBOL_TABLE_ENTRY> hashTable;
+	TYPE_INFO typeInfo;
 
 public:
   //Constructor
@@ -43,18 +50,12 @@ public:
   // If a SYMBOL_TABLE_ENTRY with name theName is
   // found in this symbol table, then return true;
   // otherwise, return false.
-  bool findEntry(string theName)
+  TYPE_INFO findEntry(string theName) 
   {
     map<string, SYMBOL_TABLE_ENTRY>::iterator itr;
     if ((itr = hashTable.find(theName)) == hashTable.end())
-      return(false);
-    else return(true);
-  }
-
-  // assumes that entry with theName exists
-  SYMBOL_TABLE_ENTRY getEntry(string theName)
-  {
-      return hashTable.at(theName);
+      return(UNDEFINED);
+    else return(typeInfo);
   }
 
 };
