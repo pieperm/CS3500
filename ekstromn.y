@@ -68,7 +68,8 @@ extern "C"
 %type <text> T_IDENT
 %type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
 %type <typeInfo> N_ARITHLOGIC_EXPR N_LET_EXPR N_LAMBDA_EXPR N_PRINT_EXPR
-%type <typeInfo> N_INPUT_EXPR N_EXPR_LIST
+%type <typeInfo> N_INPUT_EXPR N_EXPR_LIST N_ACTUAL_PARAMS N_PROGN_OR_USERFUNCTCALL
+%type <typeInfo> N_FUNCT_NAME
 /*
  *	Starting point.
  */
@@ -179,27 +180,52 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				;
 N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				{
-				
+				if($1.numParams < $2.numParams)
+					yyerror("Too many parameters in function call");
+				if($1.numParams > $2.numParams)
+					yyerror("Too few parameters in function call");
+					
+				if($1.type == -1)
+				{
+					$$.type = $2.type;
+					if($2.type == -1)
+						$$.type = BOOL;
+				}
 				}
 				| T_LPAREN N_LAMBDA_EXPR T_RPAREN N_ACTUAL_PARAMS
 				{
+				if($2.numParams < $4.numParams)
+					yyerror("Too many parameters in function call");
+				if($2.numParams > $4.numParams)
+					yyerror("Too few parameters in function call");
+				$$.type = $2.returnType;
 				}
 				;
 N_ACTUAL_PARAMS : N_EXPR_LIST{
+				$$.type = $1.type;
+				$$.numParams = $1.numParams;
+				$$.returnType = $1.returnType;
 				}
 				| //epsilon
 				{
+				$$.type = NOT_APPLICABLE;
 				}
 N_FUNCT_NAME		: T_PROGN
 				{
-				
+				$$.type = UNDEFINED;
 				}
 				| T_IDENT
 				{
-				
 				bool found = findEntryInAnyScope(string($1));
 				if(!found)
 					yyerror("undefined identifier");
+				else
+				{
+					TYPE_INFO info = scopeStack.top( ).findEntry(string($1));
+					$$.type = info.type;
+					$$.numParams = info.numParams;
+					$$.returnType = info.returnType;
+				}
 				}
                      	;
 N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
@@ -269,7 +295,7 @@ N_LAMBDA_EXPR   : T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
 			else
 			{
 			$$.type = FUNCTION;
-			$$.numParams = $5.numParams; //supposed to be length of N_ID_LIST
+			$$.numParams = scopeStack.top().size(); //supposed to be length of N_ID_LIST
 			$$.returnType = $5.type;
 			}
 			endScope();
@@ -283,7 +309,7 @@ N_ID_LIST       : /* epsilon */
 			{
 			
 			TYPE_INFO finder = scopeStack.top( ).findEntry(string($2));
-			if (finder.type == -1)
+			if (finder.type != -1)
 				yyerror("multiply defined identifier");
 			else
 			{
@@ -323,7 +349,7 @@ N_EXPR_LIST     : N_EXPR N_EXPR_LIST
       | N_EXPR
 			{
 			$$.type = $1.type;
-			$$.numParams = $1.numParams;
+			$$.numParams += 1;
 			$$.returnType = $1.returnType;
 			}
 			;

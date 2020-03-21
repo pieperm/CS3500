@@ -49,12 +49,14 @@ public:
     map<string, SYMBOL_TABLE_ENTRY>::iterator itr;
     if ((itr = hashTable.find(theName)) == hashTable.end())
 		{
-			hashTable.at(theName).setType(UNDEFINED);
-			return(hashTable.at(theName).getTypeInfo());
+			TYPE_INFO info;
+			info.type = NOT_APPLICABLE;
+			return(info);
     }
 		else return(hashTable.at(theName).getTypeInfo());
   }
 
+	int size() const { return hashTable.size(); }
 };
 
 #endif  // SYMBOL_TABLE_H
