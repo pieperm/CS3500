@@ -4,3 +4,9 @@ bison.tab.c
 lex.yy.c
 mfpl_parser.exe
 main.cpp
+*.output
+*.c
+*.out
+mfpl_parser
+mfpl.y
+.gitignore
