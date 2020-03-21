@@ -29,6 +29,7 @@ void bail();
 void beginScope();
 void endScope();
 bool findEntryInAnyScope(const string theName);
+void printExpressionType(const int type);
 
 stack<SYMBOL_TABLE> scopeStack;
 
@@ -53,7 +54,7 @@ extern "C"
 {
 	char* text;
 	TYPE_INFO typeInfo; 
-};
+}
 
 /*
  *	Token declarations
@@ -78,11 +79,11 @@ extern "C"
 %%
 N_START		: // epsilon 
 			{
-			
+
 			}
 			| N_START N_EXPR
 			{
-			
+			printExpressionType($2.type);
 			printf("\n---- Completed parsing ----\n\n");
 			}
 			;
@@ -406,6 +407,37 @@ bool findEntryInAnyScope(const string theName)
 		scopeStack.push(symbolTable); 			// restore the stack
 		return(found);
 	}
+}
+
+void printExpressionType(const int type) {
+  char const * typeStr;
+  switch(type) {
+    case 0:
+      typeStr = "FUNCTION";
+      break;
+    case 1:
+      typeStr = "INT";
+      break;
+    case 2:
+      typeStr = "STR";
+      break;
+    case 3:
+      typeStr = "INT_OR_STR";
+      break;
+    case 4:
+      typeStr = "BOOL";
+      break;
+    case 5:
+      typeStr = "INT_OR_BOOL";
+      break;
+    case 6:
+      typeStr = "STR_OR_BOOL";
+      break;
+    case 7:
+      typeStr = "INT_OR_STR_OR_BOOL";
+      break;
+  }
+  printf("EXPR type is: %s\n", typeStr);
 }
 
 int main() 
