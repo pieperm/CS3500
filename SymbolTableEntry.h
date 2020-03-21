@@ -20,8 +20,8 @@ public:
 	{
 		name = ""; 
 		typeInfo.type = UNDEFINED; 
-		typeInfo.numParams = theType.numParams;
-		typeInfo.returnType = theType.returnType;
+		typeInfo.numParams = UNDEFINED;
+		typeInfo.returnType = UNDEFINED;
 	}
 
   SYMBOL_TABLE_ENTRY(const string theName, const TYPE_INFO theType) 
