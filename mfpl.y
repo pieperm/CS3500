@@ -50,25 +50,25 @@ extern "C"
 
 %%
 N_START	: {
-  printRule("START", "epsilon");
+
 }
 | N_START N_EXPR {
-  printRule("START", "START EXPR");
+
   printf("\n---- Completed parsing ----\n\n");
 };
 
 N_EXPR : N_CONST {
-  printRule("EXPR", "CONST");
+
   printExpressionType($1.type);
 }
 | T_IDENT {
-  printRule("EXPR", "IDENT");
+
   checkForDefinition($1);
   TYPE_INFO info = scopeStack.top().getEntry(string($1)).getTypeInfo();
   printExpressionType(info.type);
 }
 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN {
-  printRule("EXPR", "( PARENTHESIZED_EXPR )");
+
   $$.type = $2.type;
   $$.numParams = $2.numParams;
   $$.returnType = $2.returnType;
@@ -76,182 +76,182 @@ N_EXPR : N_CONST {
 };
 
 N_CONST : T_INTCONST {
-  printRule("CONST", "INTCONST");
+
   $$.type = INT;
   $$.numParams = NOT_APPLICABLE;
   $$.returnType = NOT_APPLICABLE;
 }
 | T_STRCONST {
-  printRule("CONST", "STRCONST");
+
   $$.type = STR;
   $$.numParams = NOT_APPLICABLE;
   $$.returnType = NOT_APPLICABLE;
 }
 | T_T {
-  printRule("CONST", "t");
+
   $$.type = BOOL;
   $$.numParams = NOT_APPLICABLE;
   $$.returnType = NOT_APPLICABLE;
 }
 | T_NIL {
-  printRule("CONST", "nil");
+
   $$.type = BOOL;
   $$.numParams = NOT_APPLICABLE;
   $$.returnType = NOT_APPLICABLE;
 };
 
 N_PARENTHESIZED_EXPR : N_ARITHLOGIC_EXPR {
-  printRule("PARENTHESIZED_EXPR", "ARITHLOGIC_EXPR");
+
 }
 | N_IF_EXPR {
-  printRule("PARENTHESIZED_EXPR", "IF_EXPR");
+
 }
 | N_LET_EXPR {
-  printRule("PARENTHESIZED_EXPR", "LET_EXPR");
+
 }
 | N_LAMBDA_EXPR {
-  printRule("PARENTHESIZED_EXPR", "LAMBDA_EXPR");
+
 }
 | N_PRINT_EXPR {
-  printRule("PARENTHESIZED_EXPR", "PRINT_EXPR");
+
 }
 | N_INPUT_EXPR {
-  printRule("PARENTHESIZED_EXPR", "INPUT_EXPR");
+
 }
 | N_PROGN_OR_USERFUNCTCALL {
-  printRule("PARENTHESIZED_EXPR", "PROGN_OR_USERFUNCTCALL");
+
 }
 | T_EXIT {
-  printRule("PARENTHESIZED_EXPR", "EXIT");
+
   printf("\nBye!\n");
   exit(0);
 };
 
 N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS {
-  printRule("PROGN_OR_USERFUNCTCALL", "FUNCT_NAME ACTUAL_PARAMS");
+
 }
 | T_LPAREN N_LAMBDA_EXPR T_RPAREN N_ACTUAL_PARAMS {
-  printRule("PROGN_OR_USERFUNCTCALL", "( LAMBDA_EXPR ) ACTUAL_PARAMS");
+
 };
 
 N_ACTUAL_PARAMS : N_EXPR_LIST {
-  printRule("ACTUAL_PARAMS", "EXPR_LIST");
+
 }
 | {
-  printRule("ACTUAL_PARAMS", "epsilon");
+
 };
 
 N_FUNCT_NAME : T_PROGN {
-  printRule("FUNCT_NAME", "PROGN");
+
 }
 | T_IDENT {
-  printRule("FUNCT_NAME", "IDENT");
+
   checkForDefinition($1);
 };
 
 N_ARITHLOGIC_EXPR : N_UN_OP N_EXPR {
-  printRule("ARITHLOGIC_EXPR", "UN_OP EXPR");
+
 }
 | N_BIN_OP N_EXPR N_EXPR {
-  printRule("ARITHLOGIC_EXPR", "BIN_OP EXPR EXPR");
+
 };
 
 N_IF_EXPR : T_IF N_EXPR N_EXPR N_EXPR {
-  printRule("IF_EXPR", "if EXPR EXPR EXPR");
+
 };
 
 N_LET_EXPR : T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR {
-  printRule("LET_EXPR", "let* ( ID_EXPR_LIST ) EXPR");
+
   endScope();
 };
 
-N_ID_EXPR_LIST : {
-  printRule("ID_EXPR_LIST", "epsilon");
+N_ID_EXPR_LIST : /*epsilon*/ {
+
 }
 | N_ID_EXPR_LIST T_LPAREN T_IDENT N_EXPR T_RPAREN {
-  printRule("ID_EXPR_LIST", "ID_EXPR_LIST ( IDENT EXPR )");
+
 //  addToSymbolTable($3, $$);
 };
 
 N_LAMBDA_EXPR : T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR {
-  printRule("LAMBDA_EXPR", "lambda ( ID_LIST ) EXPR");
+
   endScope();
 };
 
-N_ID_LIST : {
-  printRule("ID_LIST", "epsilon");
+N_ID_LIST : /*epsilon*/ {
+
 }
 | N_ID_LIST T_IDENT {
-  printRule("ID_LIST", "ID_LIST IDENT");
+
 //  addToSymbolTable($2, $$);
 };
 
 N_PRINT_EXPR : T_PRINT N_EXPR {
-  printRule("PRINT_EXPR", "print EXPR");
+
 };
 
 N_INPUT_EXPR : T_INPUT {
-  printRule("INPUT_EXPR", "input");
+
 };
 
 N_EXPR_LIST : N_EXPR N_EXPR_LIST {
-  printRule("EXPR_LIST", "EXPR EXPR_LIST");
+
 }
 | {
-  printRule("EXPR_LIST", "epsilon");
+
 };
 
 N_BIN_OP : N_ARITH_OP {
-  printRule("BIN_OP", "ARITH_OP");
+
 }
 | N_LOG_OP {
-  printRule("BIN_OP", "LOG_OP");
+
 }
 | N_REL_OP {
-  printRule("BIN_OP", "REL_OP");
+
 };
 
 N_ARITH_OP : T_MULT {
-  printRule("ARITH_OP", "*");
+
 }
 | T_SUB {
-  printRule("ARITH_OP", "-");
+
 }
 | T_DIV {
-  printRule("ARITH_OP", "/");
+
 }
 | T_ADD {
-  printRule("ARITH_OP", "+");
+
 };
 
 N_LOG_OP : T_AND {
-  printRule("LOG_OP", "and");
+
 }
 | T_OR {
-  printRule("LOG_OP", "or");
+
 };
 
 N_REL_OP : T_LT {
-  printRule("REL_OP", "<");
+
 }
 | T_GT {
-  printRule("REL_OP", ">");
+
 }
 | T_LE {
-  printRule("REL_OP", "<=");
+
 }
 | T_GE {
-  printRule("REL_OP", ">=");
+
 }
 | T_EQ {
-  printRule("REL_OP", "=");
+
 }
 | T_NE {
-  printRule("REL_OP", "/=");
+
 };
 
 N_UN_OP : T_NOT {
-  printRule("UN_OP", "not");
+
 };
 
 %%
