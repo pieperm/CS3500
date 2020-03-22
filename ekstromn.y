@@ -199,7 +199,6 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				}
 				| T_LPAREN N_LAMBDA_EXPR T_RPAREN N_ACTUAL_PARAMS
 				{
-				cout << $2.numParams << "       " << $4.numParams << endl;
 				
 				if($2.numParams < $4.numParams)
 					yyerror("Too many parameters in function call");
