@@ -236,7 +236,7 @@ N_FUNCT_NAME		: T_PROGN
 N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				{
 				if($2.type == FUNCTION)
-					yyerror("Arg 1 cannot be function");
+					yyerror("Arg 1 cannot be a function");
 				$$.type = BOOL;
 				$$.numParams = NOT_APPLICABLE;
 				$$.returnType = NOT_APPLICABLE;
@@ -273,11 +273,11 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 N_IF_EXPR    	: T_IF N_EXPR N_EXPR N_EXPR
 			{
 			if($2.type == FUNCTION)
-				yyerror("Arg 1 cannot be function");
+				yyerror("Arg 1 cannot be a function");
 			else if($3.type == FUNCTION)
-				yyerror("Arg 2 cannot be function");
+				yyerror("Arg 2 cannot be a function");
 			else if($4.type == FUNCTION)
-				yyerror("Arg 3 cannot be function");
+				yyerror("Arg 3 cannot be a function");
 			else
 			{
 			$$.type = $3.type | $4.type;
@@ -307,7 +307,7 @@ N_ID_EXPR_LIST  : /* epsilon */
 			{
 			
 			TYPE_INFO info = scopeStack.top( ).findEntry(string($3));
-			if (info.type == -1)
+			if (info.type != -1)
 				yyerror("multiply defined identifier");
 			else
 			{
@@ -353,7 +353,7 @@ N_ID_LIST       : /* epsilon */
 N_PRINT_EXPR    : T_PRINT N_EXPR
 			{
 			if($2.type == FUNCTION)
-				yyerror("Arg 1 cannot be function");
+				yyerror("Arg 1 cannot be a function");
 			else
 				{
 				$$.type = $2.type;
