@@ -247,7 +247,7 @@ N_FUNCT_NAME		: T_PROGN
 					yyerror("undefined identifier");
 				else
 				{
-					TYPE_INFO info = scopeStack.top( ).findEntry(string($1));
+					TYPE_INFO info = scopeStack.top().findEntry(string($1));
 					$$.type = info.type;
 					$$.numParams = info.numParams;
 					$$.returnType = info.returnType;
@@ -281,9 +281,9 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				        $$.type = BOOL;
 				    }
 				} else if($1 == 3) {  // relational operator
-                    if(!($2.type & INT)) {
+                    if(!($2.type & INT) && !($2.type & STR)) {
                         yyerror("Arg 1 must be integer or string");
-                    } else if(!($3.type & INT)) {
+                    } else if(!($3.type & INT) && !($3.type & STR)) {
                         yyerror("Arg 2 must be integer or string");
                     } else {
                         $$.type = BOOL;
@@ -510,15 +510,15 @@ void endScope()
 
 bool findEntryInAnyScope(const string theName)
 {
-	if (scopeStack.empty( )) return(false);
-	TYPE_INFO finder = scopeStack.top( ).findEntry(theName);
+	if (scopeStack.empty()) return(false);
+	TYPE_INFO finder = scopeStack.top().findEntry(theName);
 	int found = finder.type;
 	if (found != -1)
 		return(true);
 	else 
 	{ // check in "next higher" scope
-		SYMBOL_TABLE symbolTable = scopeStack.top( );
-		scopeStack.pop( );
+		SYMBOL_TABLE symbolTable = scopeStack.top();
+		scopeStack.pop();
 		found = findEntryInAnyScope(theName);
 		scopeStack.push(symbolTable); 			// restore the stack
 		return(found);
