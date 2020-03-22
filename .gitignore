@@ -11,3 +11,4 @@ mfpl_parser
 mfpl.y
 .gitignore
 *.txt
+compare_output.sh

@@ -112,7 +112,6 @@ N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 			}
                 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
       {
-			
 			$$.type = $2.type;
 			$$.numParams = $2.numParams;
 			$$.returnType = $2.returnType;
@@ -197,7 +196,7 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				{
 				$$.type = $1.type;
-				if($1.type == 7)
+				if($1.type == UNDEFINED)
 				{
 					$$.type = $2.type;
 					if($2.type == -1)
@@ -233,7 +232,7 @@ N_ACTUAL_PARAMS : N_EXPR_LIST{
 				}
 N_FUNCT_NAME		: T_PROGN
 				{
-				$$.type = INT_OR_STR_OR_BOOL;
+				$$.type = UNDEFINED;
 				$$.numParams = 0;
 				$$.returnType = UNDEFINED;
 				}
@@ -308,6 +307,7 @@ N_IF_EXPR    	: T_IF N_EXPR N_EXPR N_EXPR
 			;
 N_LET_EXPR      : T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
 			{
+			endScope();
 			if($5.type == FUNCTION)
 				yyerror("Arg 2 cannot be a function");
 			else
@@ -316,7 +316,6 @@ N_LET_EXPR      : T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
 			$$.numParams = $5.numParams;
 			$$.returnType = $5.returnType;
 			}
-			endScope();
 			}
 			;
 N_ID_EXPR_LIST  : /* epsilon */
