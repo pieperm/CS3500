@@ -95,7 +95,7 @@ N_START		: // epsilon
 N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 			{
 			$$.type = $1.type;
-			$$.numParams = $1.numParams;
+			$$.numParams = 0;
 			$$.returnType = $1.returnType;
 			}
 								| T_IDENT
@@ -379,7 +379,7 @@ N_EXPR_LIST     : N_EXPR N_EXPR_LIST
       | N_EXPR
 			{
 			$$.type = $1.type;
-			$$.numParams = $1.numParams + 2; //add 1 for the current expression, another to cancel the -1 of UNDEFINED
+			$$.numParams = $1.numParams + 1; //add 1 for the current expression
 			$$.returnType = $1.returnType;
 			}
 			;
