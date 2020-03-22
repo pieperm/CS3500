@@ -151,13 +151,13 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
-				$$.returnType = UNDEFINED;
+				$$.returnType = $1.returnType;
 				}
                       | N_IF_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
-				$$.returnType = UNDEFINED;
+				$$.returnType = $1.returnType;
 				}
                       | N_LET_EXPR 
 				{
@@ -169,25 +169,25 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
-				$$.returnType = UNDEFINED;
+				$$.returnType = $1.returnType;
 				}
                       | N_PRINT_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
-				$$.returnType = UNDEFINED;
+				$$.returnType = $1.returnType;
 				}
                       | N_INPUT_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
-				$$.returnType = UNDEFINED;
+				$$.returnType = $1.returnType;
 				}
                      | N_PROGN_OR_USERFUNCTCALL 
 				{
 				$$.type = $1.type;
 				$$.numParams = $1.numParams;
-				$$.returnType = UNDEFINED;
+				$$.returnType = $1.returnType;
 				}
 				| T_EXIT
 				{
@@ -196,6 +196,7 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				;
 N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				{
+				$$.type = $1.type;
 				if($1.type == 7)
 				{
 					$$.type = $2.type;
@@ -244,9 +245,11 @@ N_FUNCT_NAME		: T_PROGN
 				else
 				{
 					TYPE_INFO info = scopeStack.top().findEntry(string($1));
-					$$.type = info.type;
+					if(info.type != 0)
+						yyerror("Arg 1 must be a function");
+					$$.type = info.returnType;
 					$$.numParams = info.numParams;
-					$$.returnType = info.returnType;
+					$$.returnType = UNDEFINED;
 				}
 				}
                      	;
