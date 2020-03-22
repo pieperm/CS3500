@@ -10,3 +10,4 @@ main.cpp
 mfpl_parser
 mfpl.y
 .gitignore
+*.txt
