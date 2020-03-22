@@ -185,6 +185,7 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				;
 N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				{
+				cout << $1.numParams << "     " << $2.numParams << endl;
 				if($1.numParams < $2.numParams)
 					yyerror("Too many parameters in function call");
 				if($1.numParams > $2.numParams)
@@ -199,7 +200,7 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				}
 				| T_LPAREN N_LAMBDA_EXPR T_RPAREN N_ACTUAL_PARAMS
 				{
-				
+				//cout << $2.numParams << "     " << $4.numParams << endl;
 				if($2.numParams < $4.numParams)
 					yyerror("Too many parameters in function call");
 				if($2.numParams > $4.numParams)
@@ -208,13 +209,17 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				}
 				;
 N_ACTUAL_PARAMS : N_EXPR_LIST{
+				cout << "help plz\n";
 				$$.type = $1.type;
 				$$.numParams = $1.numParams;
 				$$.returnType = $1.returnType;
 				}
 				| //epsilon
 				{
+				cout << "help\n";
 				$$.type = NOT_APPLICABLE;
+				$$.numParams = 0;
+				$$.returnType = NOT_APPLICABLE;
 				}
 N_FUNCT_NAME		: T_PROGN
 				{

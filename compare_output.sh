@@ -25,7 +25,7 @@ diff_files=0
 echo > comparison.txt
 
 for file in $test_files; do
-	./mfpl_parser.exe < ./sample_input/$file > ./my_output/$file.out
+	mfpl_parser.exe < ./sample_input/$file > ./my_output/$file.out
 	
     diff_lines=`diff ./my_output/$file.out \
 					./expected_output/$file.out \
