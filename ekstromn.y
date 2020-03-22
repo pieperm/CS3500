@@ -150,52 +150,65 @@ N_CONST		: T_INTCONST
 N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR 
 				{
 				$$.type = $1.type;
-				$$.numParams = NOT_APPLICABLE;
-				$$.returnType = NOT_APPLICABLE;
+				$$.numParams = UNDEFINED;
+				$$.returnType = UNDEFINED;
 				}
                       | N_IF_EXPR 
 				{
-				
+				$$.type = $1.type;
+				$$.numParams = UNDEFINED;
+				$$.returnType = UNDEFINED;
 				}
                       | N_LET_EXPR 
 				{
-				
+				$$.type = $1.type;
+				$$.numParams = UNDEFINED;
+				$$.returnType = UNDEFINED;
 				}
                       | N_LAMBDA_EXPR 
 				{
-				
+				$$.type = $1.type;
+				$$.numParams = UNDEFINED;
+				$$.returnType = UNDEFINED;
 				}
                       | N_PRINT_EXPR 
 				{
-				
+				$$.type = $1.type;
+				$$.numParams = UNDEFINED;
+				$$.returnType = UNDEFINED;
 				}
                       | N_INPUT_EXPR 
 				{
-				
+				$$.type = $1.type;
+				$$.numParams = UNDEFINED;
+				$$.returnType = UNDEFINED;
 				}
                      | N_PROGN_OR_USERFUNCTCALL 
 				{
-				
+				$$.type = $1.type;
+				$$.numParams = 0;
+				$$.returnType = UNDEFINED;
 				}
 				| T_EXIT
 				{
-				
 				bail();
 				}
 				;
 N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				{
-				cout << $1.numParams << "     " << $2.numParams << endl;
-				if($1.numParams < $2.numParams)
-					yyerror("Too many parameters in function call");
-				if($1.numParams > $2.numParams)
-					yyerror("Too few parameters in function call");
-
+				//cout << $1.numParams << "     " << $2.numParams << endl;
 				if($1.type == -1)
 				{
 					$$.type = $2.type;
 					if($2.type == -1)
+					{
+						if($1.numParams < $2.numParams)
+							yyerror("Too many parameters in function call");
+						if($1.numParams > $2.numParams)
+							yyerror("Too few parameters in function call");
+					if($2.type == -1)
 						$$.type = BOOL;
+					}
 				}
 				}
 				| T_LPAREN N_LAMBDA_EXPR T_RPAREN N_ACTUAL_PARAMS
@@ -209,14 +222,14 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				}
 				;
 N_ACTUAL_PARAMS : N_EXPR_LIST{
-				cout << "help plz\n";
+				//cout << "help plz\n";
 				$$.type = $1.type;
 				$$.numParams = $1.numParams;
 				$$.returnType = $1.returnType;
 				}
 				| //epsilon
 				{
-				cout << "help\n";
+				//cout << "help\n";
 				$$.type = NOT_APPLICABLE;
 				$$.numParams = 0;
 				$$.returnType = NOT_APPLICABLE;
@@ -224,6 +237,8 @@ N_ACTUAL_PARAMS : N_EXPR_LIST{
 N_FUNCT_NAME		: T_PROGN
 				{
 				$$.type = UNDEFINED;
+				$$.numParams = 0;
+				$$.returnType = UNDEFINED;
 				}
 				| T_IDENT
 				{
