@@ -194,6 +194,8 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				}
 				| T_LPAREN N_LAMBDA_EXPR T_RPAREN N_ACTUAL_PARAMS
 				{
+				cout << $2.numParams << "       " << $4.numParams << endl;
+				
 				if($2.numParams < $4.numParams)
 					yyerror("Too many parameters in function call");
 				if($2.numParams > $4.numParams)
@@ -343,13 +345,13 @@ N_INPUT_EXPR    : T_INPUT
 N_EXPR_LIST     : N_EXPR N_EXPR_LIST  
 			{
 			$$.type = $2.type;
-			$$.numParams = $2.numParams;
+			$$.numParams = $2.numParams + 1;
 			$$.returnType = $2.returnType;
 			}
       | N_EXPR
 			{
 			$$.type = $1.type;
-			$$.numParams += 1;
+			$$.numParams = $1.numParams + 2; //add 1 for the current expression, another to cancel the -1 of UNDEFINED
 			$$.returnType = $1.returnType;
 			}
 			;
