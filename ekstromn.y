@@ -162,8 +162,8 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
                       | N_LET_EXPR 
 				{
 				$$.type = $1.type;
-				$$.numParams = UNDEFINED;
-				$$.returnType = UNDEFINED;
+				$$.numParams = $1.numParams;
+				$$.returnType = $1.returnType;
 				}
                       | N_LAMBDA_EXPR 
 				{
@@ -186,7 +186,7 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
                      | N_PROGN_OR_USERFUNCTCALL 
 				{
 				$$.type = $1.type;
-				$$.numParams = 0;
+				$$.numParams = $1.numParams;
 				$$.returnType = UNDEFINED;
 				}
 				| T_EXIT
@@ -196,8 +196,7 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				;
 N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				{
-				//cout << $1.numParams << "     " << $2.numParams << endl;
-				if($1.type == -1)
+				if($1.type == 7)
 				{
 					$$.type = $2.type;
 					if($2.type == -1)
@@ -213,7 +212,6 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				}
 				| T_LPAREN N_LAMBDA_EXPR T_RPAREN N_ACTUAL_PARAMS
 				{
-				//cout << $2.numParams << "     " << $4.numParams << endl;
 				if($2.numParams < $4.numParams)
 					yyerror("Too many parameters in function call");
 				if($2.numParams > $4.numParams)
@@ -222,21 +220,19 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				}
 				;
 N_ACTUAL_PARAMS : N_EXPR_LIST{
-				//cout << "help plz\n";
 				$$.type = $1.type;
 				$$.numParams = $1.numParams;
 				$$.returnType = $1.returnType;
 				}
 				| //epsilon
 				{
-				//cout << "help\n";
 				$$.type = NOT_APPLICABLE;
 				$$.numParams = 0;
 				$$.returnType = NOT_APPLICABLE;
 				}
 N_FUNCT_NAME		: T_PROGN
 				{
-				$$.type = UNDEFINED;
+				$$.type = INT_OR_STR_OR_BOOL;
 				$$.numParams = 0;
 				$$.returnType = UNDEFINED;
 				}
@@ -322,7 +318,9 @@ N_LET_EXPR      : T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
 			;
 N_ID_EXPR_LIST  : /* epsilon */
 			{
-			
+			$$.type = NOT_APPLICABLE;
+			$$.numParams = 0;
+			$$.returnType = NOT_APPLICABLE;
 			}
       | N_ID_EXPR_LIST T_LPAREN T_IDENT N_EXPR T_RPAREN 
 			{
