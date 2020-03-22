@@ -245,9 +245,9 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				| N_BIN_OP N_EXPR N_EXPR
 				{
 				if($1 == 1) {  // arithmetic operator
-				    if($2.type != INT) {
+				    if(!($2.type & INT)) {
 				        yyerror("Arg 1 must be integer");
-				    } else if($3.type != INT) {
+				    } else if(!($3.type & INT)) {
 				        yyerror("Arg 2 must be integer");
 				    } else {
 				        $$.type = INT;
@@ -261,9 +261,9 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				        $$.type = BOOL;
 				    }
 				} else if($1 == 3) {  // relational operator
-                    if($2.type != INT && $2.type != STR) {
+                    if(!($2.type & INT)) {
                         yyerror("Arg 1 must be integer or string");
-                    } else if($3.type != INT && $3.type != STR) {
+                    } else if(!($3.type & INT)) {
                         yyerror("Arg 2 must be integer or string");
                     } else {
                         $$.type = BOOL;
