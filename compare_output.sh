@@ -16,15 +16,16 @@
 # to the correct format specified in Canvas.
 # Otherwise, make sure your executable is named `a.out`
 # or update the first line in the for loop.
-flex mfpl.l
-bison mfpl.y
-g++ mfpl.tab.c
+flex ekstromn.l
+bison ekstromn.y
+g++ ekstromn.tab.c -o mfpl_parser
 
 test_files=`ls ./sample_input`
 diff_files=0
+echo > comparison.txt
 
 for file in $test_files; do
-	a.out < ./sample_input/$file > ./my_output/$file.out
+	./mfpl_parser.exe < ./sample_input/$file > ./my_output/$file.out
 	
     diff_lines=`diff ./my_output/$file.out \
 					./expected_output/$file.out \
@@ -32,13 +33,13 @@ for file in $test_files; do
 					
 	if [ $diff_lines == 0 ]
 	then
-		echo $file matches.
+		echo $file matches. >> comparison.txt
 	else
 		diff_files=$((diff_files+1))
-		echo $file does not match. There are $diff_lines differences.
+		echo $file does not match. There are $diff_lines differences. >> comparison.txt
 	fi
 done
 
-echo
-echo "Number of different input files: $diff_files"
-echo
+echo >> comparison.txt
+echo "Number of different input files: $diff_files" >> comparison.txt
+echo >> comparison.txt

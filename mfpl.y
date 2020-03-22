@@ -45,6 +45,8 @@ extern "C"
 
 %type <text> T_IDENT
 %type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
+%type <typeInfo> N_ARITHLOGIC_EXPR N_LET_EXPR N_LAMBDA_EXPR N_PRINT_EXPR
+%type <typeInfo> N_INPUT_EXPR N_EXPR_LIST
 
 %start N_START
 
