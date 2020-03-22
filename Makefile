@@ -6,4 +6,4 @@ default:
 
 .PHONY: clean
 clean:
-	del lex.yy.c mfpl_parser.exe bison.tab.c
+	del lex.yy.c mfpl_parser.exe ekstromn.tab.c
