@@ -197,7 +197,7 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 				{
 				$$.type = $1.type;
-				if($1.type == 7)
+				if($1.type == -1)
 				{
 					$$.type = $2.type;
 					if($2.type == -1)
@@ -233,7 +233,7 @@ N_ACTUAL_PARAMS : N_EXPR_LIST{
 				}
 N_FUNCT_NAME		: T_PROGN
 				{
-				$$.type = INT_OR_STR_OR_BOOL;
+				$$.type = UNDEFINED;
 				$$.numParams = 0;
 				$$.returnType = UNDEFINED;
 				}
