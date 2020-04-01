@@ -12,3 +12,4 @@ mfpl.y
 .gitignore
 *.txt
 compare_output.sh
+*.zip
