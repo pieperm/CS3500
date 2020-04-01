@@ -1,5 +1,7 @@
-EXPR type is: BOOL
+
 ---- Completed parsing ----
 
+
+Value of the expression is: t
 
 Bye!

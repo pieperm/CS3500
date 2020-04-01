@@ -1,4 +1,0 @@
-(progn
-  ((lambda (x) (print x)) "foo")
-  ((lambda (x) (print x)) 1)
-)

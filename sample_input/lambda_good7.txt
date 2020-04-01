@@ -1,7 +1,0 @@
-(let* ( (f (lambda (x) (print x)))
-      )
- (progn
-  (f "foo")
-  (f 1)
- )
-)
