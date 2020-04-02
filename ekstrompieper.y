@@ -56,6 +56,7 @@ extern "C"
 	char* text;
 	TYPE_INFO typeInfo;
 	int binOpType;
+	bool boolType;
 }
 
 /*
@@ -67,7 +68,9 @@ extern "C"
 %token  T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_NOT	 
 %token  T_INTCONST T_STRCONST T_T T_NIL T_IDENT T_UNKNOWN
 
-%type <text> T_IDENT T_INTCONST T_STRCONST T_T T_NIL N_ARITH_OP
+%type <binOpType> T_INTCONST
+%type <boolType> T_T T_NIL
+%type <text> T_IDENT T_STRCONST N_ARITH_OP
 %type <text> T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_ADD  T_SUB  T_MULT  T_DIV
 %type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
 %type <typeInfo> N_ARITHLOGIC_EXPR N_LET_EXPR  N_PRINT_EXPR
@@ -91,7 +94,18 @@ N_START		: // epsilon
 			{
 			printf("---- Completed parsing ----\n\n");
 			printf("\nValue of the expression is: ");
-			printf($2.value);
+			
+			if($2.type == INT)
+			{
+			}
+			else if($2.type == STR)
+			{
+			printf("%s", $2.strVal);
+			}
+			else
+			{
+			}													/////////////////////
+			
 			printf("\n\n");
 			}
 			;
@@ -100,7 +114,9 @@ N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 			$$.type = $1.type;
 			$$.numParams = 0;
 			$$.returnType = $1.returnType;
-			$$.value = $1.value;
+			$$.intVal = $1.intVal;
+			$$.strVal = $1.strVal;
+			$$.boolVal = $1.boolVal;
 			}
 								| T_IDENT
       {
@@ -113,14 +129,18 @@ N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 			$$.type = info.type;
 			$$.numParams = info.numParams;
 			$$.returnType = info.returnType;
-			$$.value = info.value;
+			$$.intVal = info.intVal;
+			$$.strVal = info.strVal;
+			$$.boolVal = info.boolVal;
 			}
                 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
       {
 			$$.type = $2.type;
 			$$.numParams = $2.numParams;
 			$$.returnType = $2.returnType;
-			$$.value = $2.value;
+			$$.intVal = $2.intVal;
+			$$.strVal = $2.strVal;
+			$$.boolVal = $2.boolVal;
 			}
 			;
 N_CONST		: T_INTCONST
@@ -129,7 +149,8 @@ N_CONST		: T_INTCONST
 			$$.type = INT;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
-			$$.value = $1;
+			$$.intVal = 0;
+			printf("%d", $1);
 			}
                 | T_STRCONST
 			{
@@ -137,7 +158,7 @@ N_CONST		: T_INTCONST
 			$$.type = STR;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
-			$$.value = $1;
+			$$.strVal = $1;
 			}
                 | T_T
       {
@@ -145,7 +166,7 @@ N_CONST		: T_INTCONST
 			$$.type = BOOL;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
-			$$.value = $1;
+			$$.boolVal = $1;
 			}
                 | T_NIL
       {
@@ -153,7 +174,7 @@ N_CONST		: T_INTCONST
 			$$.type = BOOL;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
-			$$.value = $1;
+			$$.boolVal = $1;
 			}
 			;
 N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR 
@@ -161,42 +182,54 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
 				$$.returnType = $1.returnType;
-				$$.value = $1.value;
+				$$.intVal = $1.intVal;
+				$$.strVal = $1.strVal;
+				$$.boolVal = $1.boolVal;
 				}
                       | N_IF_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
 				$$.returnType = $1.returnType;
-				$$.value = $1.value;
+				$$.intVal = $1.intVal;
+				$$.strVal = $1.strVal;
+				$$.boolVal = $1.boolVal;
 				}
                       | N_LET_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = $1.numParams;
 				$$.returnType = $1.returnType;
-				$$.value = $1.value;
+				$$.intVal = $1.intVal;
+				$$.strVal = $1.strVal;
+				$$.boolVal = $1.boolVal;
 				}
                       | N_PRINT_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
 				$$.returnType = $1.returnType;
-				$$.value = $1.value;
+				$$.intVal = $1.intVal;
+				$$.strVal = $1.strVal;
+				$$.boolVal = $1.boolVal;
 				}
                       | N_INPUT_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
 				$$.returnType = $1.returnType;
-				$$.value = $1.value;
+				$$.intVal = $1.intVal;
+				$$.strVal = $1.strVal;
+				$$.boolVal = $1.boolVal;
 				}
                      | N_PROGN_OR_USERFUNCTCALL 
 				{
 				$$.type = $1.type;
 				$$.numParams = $1.numParams;
 				$$.returnType = $1.returnType;
-				$$.value = $1.value;
+				$$.intVal = $1.intVal;
+				$$.strVal = $1.strVal;
+				$$.boolVal = $1.boolVal;
 				}
 				| T_EXIT
 				{
@@ -246,30 +279,31 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				$$.type = BOOL;
 				$$.numParams = NOT_APPLICABLE;
 				$$.returnType = NOT_APPLICABLE;
-				if($2.value == "nil")
-					$$.value = (char*)"t";
-				else
-					$$.value = (char*)"nil";
+				$$.boolVal = !($2.boolVal);
 				}
 				| N_BIN_OP N_EXPR N_EXPR
 				{
-				if($1 == 11 || $1 == 12 || $1 == 13 || $1 == 14) {  // arithmetic operator
-				    if(!($2.type & INT)) {
+				if($1 == 11 || $1 == 12 || $1 == 13 || $1 == 14)				{  // arithmetic operator
+						if(!($2.type & INT)) {
 				        yyerror("Arg 1 must be integer");
 				    } else if(!($3.type & INT)) {
 				        yyerror("Arg 2 must be integer");
 				    } else {
 				        $$.type = INT;
+								//printf("%d   ", $2.intVal);
+								//printf("%d  ", $3.intVal);
 								if($1 == 11)
-									$$.value = l64a(stoi($2.value) + stoi($3.value));
+									$$.intVal = $2.intVal + $3.intVal;
 								else if($1 == 12)
-									$$.value = l64a(stoi($2.value) - stoi($3.value));
+									$$.intVal = $2.intVal - $3.intVal;
 								else if($1 == 13)
-									$$.value = l64a(stoi($2.value) * stoi($3.value));
+									$$.intVal = $2.intVal * $3.intVal;
 								else
-									if(stoi($3.value) == 0)
+								{
+									if($3.intVal == 0)
 										yyerror("Attempted division by zero");
-									$$.value = l64a(stoi($2.value) / stoi($3.value));
+									$$.intVal = $2.intVal / $3.intVal;
+								}
 				    }
 				} else if($1 == 2) {  // logical operator
 				    if($2.type == FUNCTION) {
@@ -394,19 +428,19 @@ N_BIN_OP	     : N_ARITH_OP
 			;
 N_ARITH_OP	     : T_ADD
 			{
-			
+			$$ = "+";
 			}
       | T_SUB
 			{
-			
+			$$ = "-";
 			}
 			| T_MULT
 			{
-			
+			$$ = "*";
 			}
 			| T_DIV
 			{
-			
+			$$ = "/";
 			}
 			;
 N_REL_OP	     : T_LT

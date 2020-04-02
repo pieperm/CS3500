@@ -19,7 +19,9 @@ typedef struct {
     int type;
     int numParams;
     int returnType;
-		char* value;
+		char* strVal;
+		int intVal;
+		bool boolVal;
 } TYPE_INFO;
 
 class SYMBOL_TABLE_ENTRY 
@@ -38,6 +40,9 @@ public:
 		typeInfo.type = UNDEFINED; 
 		typeInfo.numParams = UNDEFINED;
 		typeInfo.returnType = UNDEFINED;
+		typeInfo.intVal = 0;
+		typeInfo.boolVal = false;
+		typeInfo.strVal = "a";
 	}
 
   SYMBOL_TABLE_ENTRY(const string theName, const TYPE_INFO theType) 
@@ -46,7 +51,9 @@ public:
     typeInfo.type = theType.type;
 		typeInfo.numParams = theType.numParams;
 		typeInfo.returnType = theType.returnType;
-		typeInfo.value = theType.value;
+		typeInfo.strVal = theType.strVal;
+		typeInfo.intVal = theType.intVal;
+		typeInfo.boolVal = theType.boolVal;
   }
 
   // Accessors
