@@ -75,12 +75,14 @@ COMMENT           ";".*$
 			return T_PROGN;
 			}
 "let*"		{
+			beginScope();
 			return T_LETSTAR;
 			}
 "if"			{
 			return T_IF;
 			}
 "lambda"		{
+			beginScope();
 			return T_LAMBDA;
 			}
 "print"		{

@@ -91,6 +91,7 @@ N_START		: // epsilon
 			printf("---- Completed parsing ----\n\n");
 			printf("\nValue of the expression is: ");
 			printf($2.value);
+			print("\n\n")
 			}
 			;
 N_EXPR		: N_CONST				//gotta cast type from further step from previous step
@@ -279,6 +280,7 @@ N_IF_EXPR    	: T_IF N_EXPR N_EXPR N_EXPR
 			;
 N_LET_EXPR      : T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
 			{
+			endScope();
 			if($5.type == FUNCTION)
 				yyerror("Arg 2 cannot be a function");
 			else
@@ -436,13 +438,11 @@ void bail()
 void beginScope()
 {
 	scopeStack.push(SYMBOL_TABLE());
-	printf("\n___Entering new scope...\n\n");
 }
 
 void endScope()
 {
 	scopeStack.pop();
-	printf("\n___Exiting scope...\n\n");
 }
 
 bool findEntryInAnyScope(const string theName)
