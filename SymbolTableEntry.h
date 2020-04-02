@@ -19,7 +19,7 @@ typedef struct {
     int type;
     int numParams;
     int returnType;
-		string value;
+		char* value;
 } TYPE_INFO;
 
 class SYMBOL_TABLE_ENTRY 
@@ -38,7 +38,6 @@ public:
 		typeInfo.type = UNDEFINED; 
 		typeInfo.numParams = UNDEFINED;
 		typeInfo.returnType = UNDEFINED;
-		typeInfo.value = "";
 	}
 
   SYMBOL_TABLE_ENTRY(const string theName, const TYPE_INFO theType) 

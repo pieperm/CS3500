@@ -67,7 +67,8 @@ extern "C"
 %token  T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_NOT	 
 %token  T_INTCONST T_STRCONST T_T T_NIL T_IDENT T_UNKNOWN
 
-%type <text> T_IDENT
+%type <text> T_IDENT T_INTCONST T_STRCONST T_T T_NIL N_ARITH_OP
+%type <text> T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_ADD  T_SUB  T_MULT  T_DIV
 %type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
 %type <typeInfo> N_ARITHLOGIC_EXPR N_LET_EXPR  N_PRINT_EXPR
 %type <typeInfo> N_INPUT_EXPR N_EXPR_LIST N_ACTUAL_PARAMS N_PROGN_OR_USERFUNCTCALL
@@ -91,7 +92,7 @@ N_START		: // epsilon
 			printf("---- Completed parsing ----\n\n");
 			printf("\nValue of the expression is: ");
 			printf($2.value);
-			print("\n\n")
+			printf("\n\n");
 			}
 			;
 N_EXPR		: N_CONST				//gotta cast type from further step from previous step
@@ -99,6 +100,7 @@ N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 			$$.type = $1.type;
 			$$.numParams = 0;
 			$$.returnType = $1.returnType;
+			$$.value = $1.value;
 			}
 								| T_IDENT
       {
@@ -111,12 +113,14 @@ N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 			$$.type = info.type;
 			$$.numParams = info.numParams;
 			$$.returnType = info.returnType;
+			$$.value = info.value;
 			}
                 | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
       {
 			$$.type = $2.type;
 			$$.numParams = $2.numParams;
 			$$.returnType = $2.returnType;
+			$$.value = $2.value;
 			}
 			;
 N_CONST		: T_INTCONST
@@ -125,6 +129,7 @@ N_CONST		: T_INTCONST
 			$$.type = INT;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
+			$$.value = $1;
 			}
                 | T_STRCONST
 			{
@@ -132,6 +137,7 @@ N_CONST		: T_INTCONST
 			$$.type = STR;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
+			$$.value = $1;
 			}
                 | T_T
       {
@@ -139,6 +145,7 @@ N_CONST		: T_INTCONST
 			$$.type = BOOL;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
+			$$.value = $1;
 			}
                 | T_NIL
       {
@@ -146,6 +153,7 @@ N_CONST		: T_INTCONST
 			$$.type = BOOL;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
+			$$.value = $1;
 			}
 			;
 N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR 
@@ -153,36 +161,42 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
 				$$.returnType = $1.returnType;
+				$$.value = $1.value;
 				}
                       | N_IF_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
 				$$.returnType = $1.returnType;
+				$$.value = $1.value;
 				}
                       | N_LET_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = $1.numParams;
 				$$.returnType = $1.returnType;
+				$$.value = $1.value;
 				}
                       | N_PRINT_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
 				$$.returnType = $1.returnType;
+				$$.value = $1.value;
 				}
                       | N_INPUT_EXPR 
 				{
 				$$.type = $1.type;
 				$$.numParams = UNDEFINED;
 				$$.returnType = $1.returnType;
+				$$.value = $1.value;
 				}
                      | N_PROGN_OR_USERFUNCTCALL 
 				{
 				$$.type = $1.type;
 				$$.numParams = $1.numParams;
 				$$.returnType = $1.returnType;
+				$$.value = $1.value;
 				}
 				| T_EXIT
 				{
@@ -232,16 +246,30 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				$$.type = BOOL;
 				$$.numParams = NOT_APPLICABLE;
 				$$.returnType = NOT_APPLICABLE;
+				if($2.value == "nil")
+					$$.value = (char*)"t";
+				else
+					$$.value = (char*)"nil";
 				}
 				| N_BIN_OP N_EXPR N_EXPR
 				{
-				if($1 == 1) {  // arithmetic operator
+				if($1 == 11 || $1 == 12 || $1 == 13 || $1 == 14) {  // arithmetic operator
 				    if(!($2.type & INT)) {
 				        yyerror("Arg 1 must be integer");
 				    } else if(!($3.type & INT)) {
 				        yyerror("Arg 2 must be integer");
 				    } else {
 				        $$.type = INT;
+								if($1 == 11)
+									$$.value = l64a(stoi($2.value) + stoi($3.value));
+								else if($1 == 12)
+									$$.value = l64a(stoi($2.value) - stoi($3.value));
+								else if($1 == 13)
+									$$.value = l64a(stoi($2.value) * stoi($3.value));
+								else
+									if(stoi($3.value) == 0)
+										yyerror("Attempted division by zero");
+									$$.value = l64a(stoi($2.value) / stoi($3.value));
 				    }
 				} else if($1 == 2) {  // logical operator
 				    if($2.type == FUNCTION) {
@@ -344,7 +372,14 @@ N_EXPR_LIST     : N_EXPR N_EXPR_LIST
 			;
 N_BIN_OP	     : N_ARITH_OP
 			{
-			$$ = 1;
+			if($1 == "+")
+				$$ = 11;
+			else if($1 == "-")
+				$$ = 12;
+			else if($1 == "*")
+				$$ = 13;
+			else
+				$$ = 14;
 			}
 			|
 			N_LOG_OP
