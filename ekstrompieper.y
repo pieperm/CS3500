@@ -164,12 +164,6 @@ N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR
 				$$.numParams = $1.numParams;
 				$$.returnType = $1.returnType;
 				}
-                      | N_LAMBDA_EXPR 
-				{
-				$$.type = $1.type;
-				$$.numParams = UNDEFINED;
-				$$.returnType = $1.returnType;
-				}
                       | N_PRINT_EXPR 
 				{
 				$$.type = $1.type;
@@ -210,14 +204,6 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 					}
 				}
 				}
-				| T_LPAREN N_LAMBDA_EXPR T_RPAREN N_ACTUAL_PARAMS
-				{
-				if($2.numParams < $4.numParams)
-					yyerror("Too many parameters in function call");
-				if($2.numParams > $4.numParams)
-					yyerror("Too few parameters in function call");
-				$$.type = $2.returnType;
-				}
 				;
 N_ACTUAL_PARAMS : N_EXPR_LIST{
 				$$.type = $1.type;
@@ -235,21 +221,6 @@ N_FUNCT_NAME		: T_PROGN
 				$$.type = UNDEFINED;
 				$$.numParams = 0;
 				$$.returnType = UNDEFINED;
-				}
-				| T_IDENT
-				{
-				bool found = findEntryInAnyScope(string($1));
-				if(!found)
-					yyerror("undefined identifier");
-				else
-				{
-					TYPE_INFO info = scopeStack.top().findEntry(string($1));
-					if(info.type != 0)
-						yyerror("Arg 1 must be a function");
-					$$.type = info.returnType;
-					$$.numParams = info.numParams;
-					$$.returnType = UNDEFINED;
-				}
 				}
                      	;
 N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
@@ -333,18 +304,6 @@ N_ID_EXPR_LIST  : /* epsilon */
 			{
 				SYMBOL_TABLE_ENTRY x(string($3), $4);
 				scopeStack.top().addEntry(x);
-			}
-			}
-			;
-N_LAMBDA_EXPR   : T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
-			{
-			if($5.type == FUNCTION)
-				yyerror("Arg 2 cannot be a function");
-			else
-			{
-			$$.type = FUNCTION;
-			$$.numParams = scopeStack.top().size(); //supposed to be length of N_ID_LIST
-			$$.returnType = $5.type;
 			}
 			}
 			;
