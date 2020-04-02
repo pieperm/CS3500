@@ -88,8 +88,8 @@ N_START		: // epsilon
 			}
 			| N_START N_EXPR
 			{
-			printExpressionType($2.type);
 			printf("---- Completed parsing ----\n\n");
+			printf("\nValue of the expression is: ");
 			}
 			;
 N_EXPR		: N_CONST				//gotta cast type from further step from previous step
@@ -307,7 +307,6 @@ N_IF_EXPR    	: T_IF N_EXPR N_EXPR N_EXPR
 			;
 N_LET_EXPR      : T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
 			{
-			endScope();
 			if($5.type == FUNCTION)
 				yyerror("Arg 2 cannot be a function");
 			else
@@ -334,7 +333,6 @@ N_ID_EXPR_LIST  : /* epsilon */
 			{
 				SYMBOL_TABLE_ENTRY x(string($3), $4);
 				scopeStack.top().addEntry(x);
-				printf("___Adding %s to symbol table\n", $3);
 			}
 			}
 			;
@@ -348,7 +346,6 @@ N_LAMBDA_EXPR   : T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
 			$$.numParams = scopeStack.top().size(); //supposed to be length of N_ID_LIST
 			$$.returnType = $5.type;
 			}
-			endScope();
 			}
 			;
 N_ID_LIST       : /* epsilon */
@@ -367,7 +364,6 @@ N_ID_LIST       : /* epsilon */
 				temp.type = INT_OR_STR_OR_BOOL;
 				SYMBOL_TABLE_ENTRY x(string($2), temp);
 				scopeStack.top().addEntry(x);
-				printf("___Adding %s to symbol table\n", $2);
 			}
 			}
 			;
@@ -556,8 +552,14 @@ void printExpressionType(const int type) {
   printf("EXPR type is: %s\n", typeStr);
 }
 
-int main()
+int main(int argc, char** argv)
 {
+	if(argc < 2)
+	{
+		printf("You must specify a file in the command line!\n");
+		exit(1);
+	}
+	yyin = fopen(argv[1], "r");
   do 
   {
 	yyparse();
