@@ -69,7 +69,7 @@ extern "C"
 
 %type <text> T_IDENT
 %type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
-%type <typeInfo> N_ARITHLOGIC_EXPR N_LET_EXPR N_LAMBDA_EXPR N_PRINT_EXPR
+%type <typeInfo> N_ARITHLOGIC_EXPR N_LET_EXPR  N_PRINT_EXPR
 %type <typeInfo> N_INPUT_EXPR N_EXPR_LIST N_ACTUAL_PARAMS N_PROGN_OR_USERFUNCTCALL
 %type <typeInfo> N_FUNCT_NAME
 %type <binOpType> N_BIN_OP
@@ -90,6 +90,7 @@ N_START		: // epsilon
 			{
 			printf("---- Completed parsing ----\n\n");
 			printf("\nValue of the expression is: ");
+			printf($2.value);
 			}
 			;
 N_EXPR		: N_CONST				//gotta cast type from further step from previous step
@@ -303,25 +304,6 @@ N_ID_EXPR_LIST  : /* epsilon */
 			else
 			{
 				SYMBOL_TABLE_ENTRY x(string($3), $4);
-				scopeStack.top().addEntry(x);
-			}
-			}
-			;
-N_ID_LIST       : /* epsilon */
-			{
-			
-			}
-      | N_ID_LIST T_IDENT 
-			{
-			
-			TYPE_INFO finder = scopeStack.top( ).findEntry(string($2));
-			if (finder.type != -1)
-				yyerror("multiply defined identifier");
-			else
-			{
-				TYPE_INFO temp;
-				temp.type = INT_OR_STR_OR_BOOL;
-				SYMBOL_TABLE_ENTRY x(string($2), temp);
 				scopeStack.top().addEntry(x);
 			}
 			}
