@@ -68,9 +68,9 @@ extern "C"
 %token  T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_NOT	 
 %token  T_INTCONST T_STRCONST T_T T_NIL T_IDENT T_UNKNOWN
 
-%type <binOpType> T_INTCONST
+%type <binOpType> T_INTCONST N_LOG_OP N_REL_OP
 %type <boolType> T_T T_NIL
-%type <text> T_IDENT T_STRCONST N_ARITH_OP
+%type <text> T_IDENT T_STRCONST N_ARITH_OP 
 %type <text> T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_ADD  T_SUB  T_MULT  T_DIV
 %type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
 %type <typeInfo> N_ARITHLOGIC_EXPR N_LET_EXPR  N_PRINT_EXPR
@@ -97,6 +97,7 @@ N_START		: // epsilon
 			
 			if($2.type == INT)
 			{
+			printf("%d", $2.intVal);
 			}
 			else if($2.type == STR)
 			{
@@ -104,7 +105,11 @@ N_START		: // epsilon
 			}
 			else
 			{
-			}													/////////////////////
+			if($2.boolVal)
+				printf("t");
+			else
+				printf("nil")
+			}	
 			
 			printf("\n\n");
 			}
@@ -149,8 +154,7 @@ N_CONST		: T_INTCONST
 			$$.type = INT;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
-			$$.intVal = 0;
-			printf("%d", $1);
+			$$.intVal = $1;
 			}
                 | T_STRCONST
 			{
@@ -166,7 +170,7 @@ N_CONST		: T_INTCONST
 			$$.type = BOOL;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
-			$$.boolVal = $1;
+			$$.boolVal = true;
 			}
                 | T_NIL
       {
@@ -174,7 +178,7 @@ N_CONST		: T_INTCONST
 			$$.type = BOOL;
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
-			$$.boolVal = $1;
+			$$.boolVal = false;
 			}
 			;
 N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR 
@@ -279,7 +283,10 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				$$.type = BOOL;
 				$$.numParams = NOT_APPLICABLE;
 				$$.returnType = NOT_APPLICABLE;
-				$$.boolVal = !($2.boolVal);
+				if($2.type == BOOL)
+					$$.boolVal = !($2.boolVal);
+				else if($2.type == INT)
+					$$.boolVal = false;
 				}
 				| N_BIN_OP N_EXPR N_EXPR
 				{
@@ -290,8 +297,6 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				        yyerror("Arg 2 must be integer");
 				    } else {
 				        $$.type = INT;
-								//printf("%d   ", $2.intVal);
-								//printf("%d  ", $3.intVal);
 								if($1 == 11)
 									$$.intVal = $2.intVal + $3.intVal;
 								else if($1 == 12)
@@ -305,21 +310,60 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 									$$.intVal = $2.intVal / $3.intVal;
 								}
 				    }
-				} else if($1 == 2) {  // logical operator
+				} else if($1 == 21 || $1 == 22) {  // logical operator
 				    if($2.type == FUNCTION) {
 				        yyerror("Arg 1 cannot be a function");
 				    } else if($3.type == FUNCTION) {
 				        yyerror("Arg 2 cannot be a function");
 				    } else {
 				        $$.type = BOOL;
+								if($1 == 21)
+									$$.boolVal = $2.intVal && $3.intVal;
+								else
+									$$.boolVal = $2.intVal || $3.intVal;
 				    }
-				} else if($1 == 3) {  // relational operator
+				} else if($1 == 31 || $1 == 32 || $1 == 33 || $1 == 34 
+									|| $1 == 35 || $1 == 36) {  // relational operator
                     if(!($2.type & INT) && !($2.type & STR)) {
                         yyerror("Arg 1 must be integer or string");
                     } else if(!($3.type & INT) && !($3.type & STR)) {
                         yyerror("Arg 2 must be integer or string");
                     } else {
                         $$.type = BOOL;
+												if($2.type == INT)
+												{
+													if($3.type != INT)
+														yyerror("Arg 2 must be integer");
+													else if($1 == 31)
+														$$.boolVal = $2.intVal < $3.intVal;
+													else if($1 == 32)
+														$$.boolVal = $2.intVal > $3.intVal;
+													else if($1 == 33)
+														$$.boolVal = $2.intVal <= $3.intVal;
+													else if($1 == 34)
+														$$.boolVal = $2.intVal >= $3.intVal;
+													else if($1 == 35)
+														$$.boolVal = $2.intVal == $3.intVal;
+													else if($1 == 36)
+														$$.boolVal = $2.intVal != $3.intVal;
+												}
+												else
+												{
+													if($3.type != STR)
+														yyerror("Arg 2 must be string");
+													else if($1 == 31)
+														$$.boolVal = $2.strVal < $3.strVal;
+													else if($1 == 32)
+														$$.boolVal = $2.strVal > $3.strVal;
+													else if($1 == 33)
+														$$.boolVal = $2.strVal <= $3.strVal;
+													else if($1 == 34)
+														$$.boolVal = $2.strVal >= $3.strVal;
+													else if($1 == 35)
+														$$.boolVal = $2.strVal == $3.strVal;
+													else if($1 == 36)
+														$$.boolVal = $2.strVal != $3.strVal;
+												}
                     }
 				}
 				}
@@ -334,9 +378,44 @@ N_IF_EXPR    	: T_IF N_EXPR N_EXPR N_EXPR
 				yyerror("Arg 3 cannot be a function");
 			else
 			{
-			$$.type = $3.type | $4.type;
-			$$.numParams = UNDEFINED;
-			$$.returnType = UNDEFINED;
+				if($2.type == INT)
+					$2.boolVal = true;
+				if($2.boolVal == false)
+				{
+					if($4.type == INT)
+					{
+					$$.intVal = $4.intVal;
+					$$.type = INT;
+					}
+					else if($4.type == STR)
+					{
+					$$.strVal = $4.strVal;
+					$$.type = $4.type;
+					}
+					else if($4.type == BOOL)
+					{
+					$$.boolVal = $4.boolVal;
+					$$.type = $4.type;
+					}
+				}
+				else
+				{
+					if($3.type == INT)
+					{
+					$$.intVal = $3.intVal;
+					$$.type = INT;
+					}
+					else if($3.type == STR)
+					{
+					$$.strVal = $3.strVal;
+					$$.type = STR;
+					}
+					else if($3.type == BOOL)
+					{
+					$$.boolVal = $3.boolVal;
+					$$.type = BOOL;
+					}
+				}
 			}
 			}
 			;
@@ -350,6 +429,9 @@ N_LET_EXPR      : T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
 			$$.type = $5.type;
 			$$.numParams = $5.numParams;
 			$$.returnType = $5.returnType;
+			$$.intVal = $5.intVal;
+			$$.strVal = $5.strVal;
+			$$.boolVal = $5.boolVal;
 			}
 			}
 			;
@@ -377,11 +459,30 @@ N_PRINT_EXPR    : T_PRINT N_EXPR
 			if($2.type == FUNCTION)
 				yyerror("Arg 1 cannot be a function");
 			else
-				{
+			{
 				$$.type = $2.type;
 				$$.numParams = UNDEFINED;
 				$$.returnType = UNDEFINED;
+				$$.intVal = $2.intVal;
+				$$.strVal = $2.strVal;
+				$$.boolVal = $2.boolVal;
+				
+				if($2.type == INT)
+				{
+				printf("%d", $2.intVal);
 				}
+				else if($3.type == STR)
+				{
+				printf("%s", $2.strVal);
+				}
+				else if($3.type == BOOL)
+				{
+					if($2.boolVal)
+						printf("t");
+					else
+						printf("nil");
+				}
+			}
 			}
 			;
 N_INPUT_EXPR    : T_INPUT
@@ -418,12 +519,26 @@ N_BIN_OP	     : N_ARITH_OP
 			|
 			N_LOG_OP
 			{
-			$$ = 2;
+			if($1 == 1)
+				$$ = 21;
+			else
+				$$ = 22;
 			}
 			|
 			N_REL_OP
 			{
-			$$ = 3;
+			if($1 == 1)
+				$$ = 31;
+			if($1 == 2)
+				$$ = 32;
+			if($1 == 3)
+				$$ = 33;
+			if($1 == 4)
+				$$ = 34;
+			if($1 == 5)
+				$$ = 35;
+			if($1 == 6)
+				$$ = 36;
 			}
 			;
 N_ARITH_OP	     : T_ADD
@@ -445,36 +560,36 @@ N_ARITH_OP	     : T_ADD
 			;
 N_REL_OP	     : T_LT
 			{
-			
+			$$ = 1;
 			}	
 			| T_GT
 			{
-			
+			$$ = 2;
 			}	
 			| T_LE
 			{
-			
+			$$ = 3;
 			}	
 			| T_GE
 			{
-			
+			$$ = 4;
 			}	
 			| T_EQ
 			{
-			
+			$$ = 5;
 			}	
 			| T_NE
 			{
-			
+			$$ = 6;
 			}
 			;	
 N_LOG_OP	     : T_AND
 			{
-			
+			$$ = 1;
 			}	
 			| T_OR
 			{
-			
+			$$ = 2;
 			}
 			;
 N_UN_OP	     : T_NOT

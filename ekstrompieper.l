@@ -110,9 +110,11 @@ COMMENT           ";".*$
 			return T_EXIT;
 			}
 {INTCONST}	     {
+			yylval.binOpType = atoi(yytext);
 			return T_INTCONST;
 			}
 {STRCONST}	     {
+			yylval.text = yytext;
 			return T_STRCONST;
 			}
 {IDENT}		{

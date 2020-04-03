@@ -41,7 +41,7 @@ public:
 		typeInfo.numParams = UNDEFINED;
 		typeInfo.returnType = UNDEFINED;
 		typeInfo.intVal = 0;
-		typeInfo.boolVal = false;
+		typeInfo.boolVal = true;
 		typeInfo.strVal = "a";
 	}
 
