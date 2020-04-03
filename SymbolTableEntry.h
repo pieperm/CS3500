@@ -42,7 +42,7 @@ public:
 		typeInfo.returnType = UNDEFINED;
 		typeInfo.intVal = 0;
 		typeInfo.boolVal = true;
-		typeInfo.strVal = "a";
+		typeInfo.strVal = const_cast<char*>("a");
 	}
 
   SYMBOL_TABLE_ENTRY(const string theName, const TYPE_INFO theType) 

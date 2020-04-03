@@ -114,7 +114,7 @@ COMMENT           ";".*$
 			return T_INTCONST;
 			}
 {STRCONST}	     {
-			yylval.text = yytext;
+			yylval.text = strdup(yytext);
 			return T_STRCONST;
 			}
 {IDENT}		{

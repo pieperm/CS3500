@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <stack>
+#include <cstring>
 #include "SymbolTable.h"
 using namespace std;
 
@@ -28,7 +29,7 @@ void prepareToTerminate();
 void bail();
 void beginScope();
 void endScope();
-bool findEntryInAnyScope(const string theName);
+TYPE_INFO findEntryInAnyScope(const string theName);
 void printExpressionType(const int type);
 
 stack<SYMBOL_TABLE> scopeStack;
@@ -68,9 +69,9 @@ extern "C"
 %token  T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_NOT	 
 %token  T_INTCONST T_STRCONST T_T T_NIL T_IDENT T_UNKNOWN
 
-%type <binOpType> T_INTCONST N_LOG_OP N_REL_OP
+%type <binOpType> T_INTCONST N_LOG_OP N_REL_OP N_ARITH_OP
 %type <boolType> T_T T_NIL
-%type <text> T_IDENT T_STRCONST N_ARITH_OP 
+%type <text> T_IDENT T_STRCONST  
 %type <text> T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_ADD  T_SUB  T_MULT  T_DIV
 %type <typeInfo> N_CONST N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR N_ID_EXPR_LIST
 %type <typeInfo> N_ARITHLOGIC_EXPR N_LET_EXPR  N_PRINT_EXPR
@@ -92,7 +93,7 @@ N_START		: // epsilon
 			}
 			| N_START N_EXPR
 			{
-			printf("---- Completed parsing ----\n\n");
+			printf("\n---- Completed parsing ----\n\n");
 			printf("\nValue of the expression is: ");
 			
 			if($2.type == INT)
@@ -108,10 +109,10 @@ N_START		: // epsilon
 			if($2.boolVal)
 				printf("t");
 			else
-				printf("nil")
+				printf("nil");
 			}	
 			
-			printf("\n\n");
+			printf("\n");
 			}
 			;
 N_EXPR		: N_CONST				//gotta cast type from further step from previous step
@@ -126,11 +127,11 @@ N_EXPR		: N_CONST				//gotta cast type from further step from previous step
 								| T_IDENT
       {
 			
-			bool found = findEntryInAnyScope(string($1));
-			if(!found)
+			TYPE_INFO found = findEntryInAnyScope(string($1));
+			if(found.type == NOT_APPLICABLE)
 				yyerror("undefined identifier");
 			
-			TYPE_INFO info = scopeStack.top().findEntry(string($1));
+			TYPE_INFO info = findEntryInAnyScope(string($1));
 			$$.type = info.type;
 			$$.numParams = info.numParams;
 			$$.returnType = info.returnType;
@@ -155,6 +156,7 @@ N_CONST		: T_INTCONST
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
 			$$.intVal = $1;
+			$$.boolVal = true;
 			}
                 | T_STRCONST
 			{
@@ -163,6 +165,7 @@ N_CONST		: T_INTCONST
 			$$.numParams = NOT_APPLICABLE;
 			$$.returnType = NOT_APPLICABLE;
 			$$.strVal = $1;
+			$$.boolVal = true;
 			}
                 | T_T
       {
@@ -274,6 +277,7 @@ N_ACTUAL_PARAMS : N_EXPR_LIST{
 				$$.type = NOT_APPLICABLE;
 				$$.numParams = 0;
 				$$.returnType = NOT_APPLICABLE;
+				$$.intVal = 0;
 				$$.boolVal = false;
 				}
 N_FUNCT_NAME		: T_PROGN
@@ -325,9 +329,9 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 				    } else {
 				        $$.type = BOOL;
 								if($1 == 21)
-									$$.boolVal = $2.intVal && $3.intVal;
+									$$.boolVal = $2.boolVal && $3.boolVal;
 								else
-									$$.boolVal = $2.intVal || $3.intVal;
+									$$.boolVal = $2.boolVal || $3.boolVal;
 				    }
 				} else if($1 == 31 || $1 == 32 || $1 == 33 || $1 == 34 
 									|| $1 == 35 || $1 == 36) {  // relational operator
@@ -367,7 +371,12 @@ N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
 													else if($1 == 34)
 														$$.boolVal = $2.strVal >= $3.strVal;
 													else if($1 == 35)
-														$$.boolVal = $2.strVal == $3.strVal;
+													{
+														if(strcmp($2.strVal, $3.strVal) == 0)
+															$$.boolVal = true;
+														else
+															$$.boolVal = false;
+													}
 													else if($1 == 36)
 														$$.boolVal = $2.strVal != $3.strVal;
 												}
@@ -476,36 +485,36 @@ N_PRINT_EXPR    : T_PRINT N_EXPR
 				
 				if($2.type == INT)
 				{
-				printf("%d", $2.intVal);
+				printf("%d\n", $2.intVal);
 				}
-				else if($3.type == STR)
+				else if($2.type == STR)
 				{
-				printf("%s", $2.strVal);
+				printf("%s\n", $2.strVal);
 				}
-				else if($3.type == BOOL)
+				else if($2.type == BOOL)
 				{
 					if($2.boolVal)
-						printf("t");
+						printf("t\n");
 					else
-						printf("nil");
+						printf("nil\n");
 				}
 			}
 			}
 			;
 N_INPUT_EXPR    : T_INPUT
 			{
-			char* userInput;
+			string userInput;
 			getline(cin, userInput);
-			if(userInput[0] == "+" || userInput[0] == "-" 
-				|| userInput[0] <= 57 || userInput[0] >=48)
+			if(userInput.at(0) == '+' || userInput.at(0) == '-' 
+				|| userInput[0] <= 57 && userInput[0] >= 48)
 			{
 				$$.type = INT;
-				$$.intVal = atoi(userInput);
+				$$.intVal = atoi(userInput.c_str());
 			}
 			else
 			{
 				$$.type = STR;
-				$$.strVal = userInput;
+				$$.strVal = const_cast<char*>(userInput.c_str());
 			}
 			$$.numParams = UNDEFINED;
 			$$.returnType = UNDEFINED;
@@ -532,11 +541,11 @@ N_EXPR_LIST     : N_EXPR N_EXPR_LIST
 			;
 N_BIN_OP	     : N_ARITH_OP
 			{
-			if($1 == "+")
+			if($1 == 1)
 				$$ = 11;
-			else if($1 == "-")
+			else if($1 == 2)
 				$$ = 12;
-			else if($1 == "*")
+			else if($1 == 3)
 				$$ = 13;
 			else
 				$$ = 14;
@@ -568,19 +577,19 @@ N_BIN_OP	     : N_ARITH_OP
 			;
 N_ARITH_OP	     : T_ADD
 			{
-			$$ = "+";
+			$$ = 1;
 			}
       | T_SUB
 			{
-			$$ = "-";
+			$$ = 2;
 			}
 			| T_MULT
 			{
-			$$ = "*";
+			$$ = 3;
 			}
 			| T_DIV
 			{
-			$$ = "/";
+			$$ = 4;
 			}
 			;
 N_REL_OP	     : T_LT
@@ -654,20 +663,25 @@ void endScope()
 	scopeStack.pop();
 }
 
-bool findEntryInAnyScope(const string theName)
+TYPE_INFO findEntryInAnyScope(const string theName)
 {
-	if (scopeStack.empty()) return(false);
+	if (scopeStack.empty()) 
+	{
+		TYPE_INFO temp;
+		temp.type = NOT_APPLICABLE;
+		return(temp);
+	}
 	TYPE_INFO finder = scopeStack.top().findEntry(theName);
 	int found = finder.type;
 	if (found != -1)
-		return(true);
+		return(finder);
 	else 
 	{ // check in "next higher" scope
 		SYMBOL_TABLE symbolTable = scopeStack.top();
 		scopeStack.pop();
-		found = findEntryInAnyScope(theName);
+		finder = findEntryInAnyScope(theName);
 		scopeStack.push(symbolTable); 			// restore the stack
-		return(found);
+		return(finder);
 	}
 }
 
