@@ -256,18 +256,25 @@ N_PROGN_OR_USERFUNCTCALL : N_FUNCT_NAME N_ACTUAL_PARAMS
 						$$.type = BOOL;
 					}
 				}
+				$$.intVal = $2.intVal;
+				$$.strVal = $2.strVal;
+				$$.boolVal = $2.boolVal;
 				}
 				;
 N_ACTUAL_PARAMS : N_EXPR_LIST{
 				$$.type = $1.type;
 				$$.numParams = $1.numParams;
 				$$.returnType = $1.returnType;
+				$$.intVal = $1.intVal;
+				$$.strVal = $1.strVal;
+				$$.boolVal = $1.boolVal;
 				}
 				| //epsilon
 				{
 				$$.type = NOT_APPLICABLE;
 				$$.numParams = 0;
 				$$.returnType = NOT_APPLICABLE;
+				$$.boolVal = false;
 				}
 N_FUNCT_NAME		: T_PROGN
 				{
@@ -487,7 +494,19 @@ N_PRINT_EXPR    : T_PRINT N_EXPR
 			;
 N_INPUT_EXPR    : T_INPUT
 			{
-			$$.type = INT_OR_STR;
+			char* userInput;
+			getline(cin, userInput);
+			if(userInput[0] == "+" || userInput[0] == "-" 
+				|| userInput[0] <= 57 || userInput[0] >=48)
+			{
+				$$.type = INT;
+				$$.intVal = atoi(userInput);
+			}
+			else
+			{
+				$$.type = STR;
+				$$.strVal = userInput;
+			}
 			$$.numParams = UNDEFINED;
 			$$.returnType = UNDEFINED;
 			}
@@ -497,12 +516,18 @@ N_EXPR_LIST     : N_EXPR N_EXPR_LIST
 			$$.type = $2.type;
 			$$.numParams = $2.numParams + 1;
 			$$.returnType = $2.returnType;
+			$$.intVal = $2.intVal;
+			$$.strVal = $2.strVal;
+			$$.boolVal = $2.boolVal;
 			}
       | N_EXPR
 			{
 			$$.type = $1.type;
 			$$.numParams = $1.numParams + 1; //add 1 for the current expression
 			$$.returnType = $1.returnType;
+			$$.intVal = $1.intVal;
+			$$.strVal = $1.strVal;
+			$$.boolVal = $1.boolVal;
 			}
 			;
 N_BIN_OP	     : N_ARITH_OP
